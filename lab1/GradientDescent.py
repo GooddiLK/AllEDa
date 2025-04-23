@@ -1,7 +1,6 @@
 # В этом файле содержится непосредственно алгоритм градиентного спуска
 
 import numpy as np
-from mpmath.matrices.eigen import hessenberg
 from utils import *
 from scipy.optimize import minimize
 
