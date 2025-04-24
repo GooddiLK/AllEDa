@@ -6,9 +6,9 @@ def get_model(function, gradient, hess, xk):
 
 
 def newtoneMethodStart(function, gradient_matrix_function, hess_matrix_function, x0=0, delta=1,
-                       iteration_stop_limit=1e-5, max_iter=100_000, learning_rate=1):
+                       iteration_stop_limit=1e-5, max_iter: int = 100_000, learning_rate=1):
     assert max_iter > 0
-    assert iteration_stop_limit != 0
+    assert iteration_stop_limit > 0
     assert delta > 0
 
     cur_iter_number = 0
@@ -27,3 +27,5 @@ def newtoneMethodStart(function, gradient_matrix_function, hess_matrix_function,
         model = get_model(function, gradient, hess, cur_x)
         p = -hess_reversed @ gradient
         C_dot = cur_x + learning_rate * p
+        A_dot = dog_leg(model, C_dot, gradient, delta) #TODO dog leg
+
