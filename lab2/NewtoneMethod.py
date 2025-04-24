@@ -63,7 +63,7 @@ def newtoneMethodStart(
         x0,  # точка в пространстве начальная
         x1,  # ещё одна точка в пространстве, отличная от начальной больше, чем на минимум
         delta=1,  # начальная дельта
-        iteration_stop_limit=1e-5,
+        iteration_stop_limit=0.001,
         max_iter: int = 100_000,
         learning_rate=1,
         trust_upper_bound=3 / 4,
@@ -79,7 +79,7 @@ def newtoneMethodStart(
     cur_x = x1
     cur_result = function(cur_x)
 
-    assert iteration_stop_limit < cur_x - prev_x
+    assert iteration_stop_limit < np.linalg.norm(cur_x - prev_x)
     while np.linalg.norm(cur_x - prev_x) < iteration_stop_limit and max_iter > cur_iter_number:
         gradient = gradient_matrix_function(cur_x)
         hess = hess_matrix_function(cur_x)
@@ -107,3 +107,14 @@ def newtoneMethodStart(
             prev_x = cur_x
             cur_x = A_dot
         cur_iter_number += 1
+
+
+x0 = np.array([0, 0])
+x1 = np.array([0, 1])
+newtoneMethodStart(
+    function=lambda vector: vector[0] ^ 2 + vector[1] ^ 2,
+    gradient_matrix_function=lambda vector: np.array([2 * vector[0], 2 * vector[1]]),
+    hess_matrix_function=lambda vector: np.array([2, 0], [0, 2]),
+    x0=x0,
+    x1=x1,
+)
