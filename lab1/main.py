@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 from GradientDescent import GradientDescent, GradientDescentWithScipy
 from LearningRateScheduling import LearningRateSchedulingConstant, LearningRateSchedulingGeom, \
     LearningRateSchedulingExponential, LearningRateSchedulingPolynomial
-from OneDimensional import Armijo, Wolfe
+from OneDimensional import Armijo, Wolfe, BFGS
 from StoppingCriteria import Iterations, SequenceEps, SequenceValueEps
 from utils import *
 
@@ -55,6 +55,7 @@ def to2(func):
 
 
 def show(func, rng, grid, last_points, r):
+    print(r)
     if last_points > 0:
         r = r[-last_points:]
     lx, ly = r[-1]
@@ -84,7 +85,7 @@ if __name__ == "__main__":
     rng = 2
 
     f_num = 1
-    test_point = [np.longdouble(10), np.longdouble(10)]
+    test_point = [np.longdouble(3), np.longdouble(-2)]
     iter_max = 10 ** 4
     #
     # run(f_num, LearningRateSchedulingConstant(0.025), SequenceValueEps(0.0001), test_point, iter_max)
@@ -105,11 +106,9 @@ if __name__ == "__main__":
 
     # BFGS с использованием scipy
     # gd_scipy = GradientDescentWithScipy(func=sympy_func[2], method="BFGS")
-
-    # res = gd_scipy((10, 10), iter_max)
+    # res = gd_scipy((1, 1), iter_max)
     # show(func_table[3][0], rng, rng/20, 300, gd_scipy(startPoint=test_point, iterations=iter_max)[0])
 
-
-
-    gd = GradientDescent(func_table[3][0], func_table[3][1], Wolfe(12, 0.001, 0.1, 0.0001), SequenceEps(10 ** -6))
-    show(func_table[3][0], rng, rng/20, 300, gd(startPoint=test_point, iterations=5 * 10**3)[0])
+    # gd = GradientDescent(func_table[3][0], func_table[3][1], Wolfe(12, 0.001, 0.1, 0.0001), SequenceEps(10 ** -6))
+    gd = GradientDescent(func_table[3][0], func_table[3][1], BFGS(sympy_func[2], 1/2, 0.6, 0.0001, 0.5), SequenceEps(10 ** -6))
+    show(func_table[3][0], rng, rng/20, 300, gd(startPoint=test_point, iterations=5000)[0])
