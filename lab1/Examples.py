@@ -1,5 +1,4 @@
 import numpy as np
-import math
 
 from GradientDescent import GradientDescent
 
@@ -17,9 +16,9 @@ func_table = [
      lambda x: [2 * (x[0] ** 2 + x[1] - 11) * (2 * x[0]) + 2 * (x[0] + x[1] ** 2 - 7),
                 2 * (x[0] + x[1] ** 2 - 7) * (2 * x[1]) + 2 * (x[0] ** 2 + x[1] - 11)]],
     # 20 + (x^2 − 10cos(2πx)) + (y^2 − 10cos(2πy))
-    [lambda x: 20 + (x[0] ** 2 - 10 * math.cos(2 * math.pi * x[0])) + (x[1] ** 2 - 10 * math.cos(2 * math.pi * x[1])),
-     lambda x: [2 * x[0] + 20 * math.pi * math.sin(2 * math.pi * x[0]),
-                2 * x[1] + 20 * math.pi * math.sin(2 * math.pi * x[1])]],
+    [lambda x: 20 + (x[0] ** 2 - 10 * np.cos(2 * np.pi * x[0])) + (x[1] ** 2 - 10 * np.cos(2 * np.pi * x[1])),
+     lambda x: [2 * x[0] + 20 * np.pi * np.sin(2 * np.pi * x[0]),
+                2 * x[1] + 20 * np.pi * np.sin(2 * np.pi * x[1])]],
 ]
 
 
