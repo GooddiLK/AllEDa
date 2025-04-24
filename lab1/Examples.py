@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 from lab1.GradientDescent import GradientDescent
 
@@ -11,10 +12,14 @@ func_table = [
     # 3x^2 - 4xy + 10y^2; a = 3; b = -4; c = 10; lambdas = 2.3699, 23.63; Число обусловленности = 9,97
     [lambda x: 3 * x[0] ** 2 + 10 * x[1] ** 2 - 4 * x[0] * x[1],
      lambda x: [6 * x[0] - 4 * x[1], 20 * x[1] - 4 * x[0]]],
-
+    # (x^2 + y - 11)^2 + (x + y^2 - 7)^2
     [lambda x: (x[0] ** 2 + x[1] - 11) ** 2 + (x[0] + x[1] ** 2 - 7) ** 2,
      lambda x: [2 * (x[0] ** 2 + x[1] - 11) * (2 * x[0]) + 2 * (x[0] + x[1] ** 2 - 7),
                 2 * (x[0] + x[1] ** 2 - 7) * (2 * x[1]) + 2 * (x[0] ** 2 + x[1] - 11)]],
+    # 20 + (x^2 − 10cos(2πx)) + (y^2 − 10cos(2πy))
+    [lambda x: 20 + (x[0] ** 2 - 10 * math.cos(2 * math.pi * x[0])) + (x[1] ** 2 - 10 * math.cos(2 * math.pi * x[1])),
+     lambda x: [2 * x[0] + 20 * math.pi * math.sin(2 * math.pi * x[0]),
+                2 * x[1] + 20 * math.pi * math.sin(2 * math.pi * x[1])]],
 ]
 
 
