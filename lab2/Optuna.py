@@ -11,7 +11,7 @@ from lab1.StoppingCriteria import *
 max_iterations = 5 * 10 ** 3
 eps = 10 ** -4
 stopping_criteria = SequenceEps(eps)
-very_big_constant = 1_000_000_000_000_000_000
+very_big_constant = 10 ** 18
 
 
 def optimizing_func(func_calc, grad_calc, found, real):

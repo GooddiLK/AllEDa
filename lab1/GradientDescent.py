@@ -2,8 +2,6 @@
 import math
 
 import numpy as np
-from utils import *
-from scipy.optimize import minimize
 
 from lab1.StoppingCriteria import IterationsPlus
 
@@ -73,7 +71,7 @@ class GradientDescent:
         prev_stopping_criteria = self.stoppingCriteria
         if iterations > 0:
             self.stoppingCriteria = IterationsPlus(iterations, prev_stopping_criteria)
-        point = startPoint.astype(np.longdouble)
+        point = np.array(startPoint).astype(np.longdouble)
         self.__history__ = [startPoint] # История посещенных точек
         self.__funcCalculation__ = 0    # Счетчик вычислений функции
         self.__gradCalculation__ = 0    # Счётчик вычислений градиента
@@ -86,49 +84,3 @@ class GradientDescent:
                 break
         self.stoppingCriteria = prev_stopping_criteria
         return self.__history__, self.__funcCalculation__, self.__gradCalculation__
-
-# принимает функцию и  метод для scipy.optimize
-# возвращает: точки, количество вычеслений функции, градиента и гессиана(если использовался)
-class GradientDescentWithScipy:
-    def __init__(self, func, method):
-        self.__funcFunc__ = func
-        self.method = method
-        self
-
-    def __call__(self, startPoint, iterations):
-        x, y = sp.symbols('x y')
-        func_numeric = sp.lambdify((x, y), self.__funcFunc__, modules="numpy")
-        grad_func_numeric = compute_gradient(self.__funcFunc__, (x, y))
-        hess_func_numeric = None
-        if self.method == "Newton-CG":
-            hess_func_numeric = compute_hessian(self.__funcFunc__, (x, y))
-        else:
-            hess_func_numeric = None
-
-        def hess_f(x_arr):
-            return np.array(hess_func_numeric(x_arr[0], x_arr[1]))
-
-        def grad_f(x_arr):
-            return np.array(grad_func_numeric(x_arr[0], x_arr[1]))
-        def f(x_arr):
-            return np.array(func_numeric(x_arr[0], x_arr[1]))
-
-        history = []
-
-        def callback(xk):
-            history.append(np.copy(xk))
-
-        result = minimize(
-            fun=f,
-            x0=np.array(startPoint, dtype=float),
-            jac=grad_f,
-            hess=hess_f,
-            method=self.method,
-            options={"maxiter": iterations},
-            callback=callback,
-        )
-
-        if self.method == "Newton-CG":
-            return history, result.nfev, result.njev, result.nhev
-        else:
-            return history, result.nfev, result.njev, 0
