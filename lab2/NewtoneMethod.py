@@ -45,13 +45,13 @@ def find_intersect(fromDot, path, sphereRadius):  # need to check
     return fromDot + t_clipped * path
 
 
-def dog_leg(function, xk, model, C_dot, gradient, delta, gradient_matrix_function):
+def dog_leg(function, xk, C_dot, gradient, delta, gradient_matrix_function):
     mop = Wolfe(12, 0.001, 0.1, 0.0001)
     gd = GradientDescent(function, gradient_matrix_function, mop, None)
     gd.vector = -gradient
     gd.history().append(xk.astype(np.longdouble))
 
-    B_dot = find_minimum(mop, gd)
+    B_dot = find_minimum(mop, gd) - xk
     A_dot = find_intersect(fromDot=B_dot, path=-B_dot + C_dot, sphereRadius=delta)
     return A_dot
 
@@ -60,7 +60,6 @@ def newtoneMethodStart(
         function,
         gradient_matrix_function,  # function gives a gradient in the dot i provide
         hess_matrix_function,  # function gives a hess in the dot i provide
-        power,  # размерность пространства (idk in english sorry)
         x0,  # точка в пространстве начальная
         x1,  # ещё одна точка в пространстве, отличная от начальной больше, чем на минимум
         delta=1,  # начальная дельта
@@ -91,9 +90,9 @@ def newtoneMethodStart(
         is_trusted = False
 
         while not is_trusted:
-            A_dot = dog_leg(model, C_dot, gradient, delta)
+            A_dot = dog_leg(function, cur_x, C_dot, gradient, delta, gradient_matrix_function)
             p_k = (cur_result - function(A_dot + cur_x)) / (
-                    model(np.array([0] * power)) - model(A_dot - cur_x))
+                    cur_result - model(A_dot))
             if p_k > trust_upper_bound:
                 delta *= trust_changing_multiply_value
             elif p_k > trust_lower_bound:
