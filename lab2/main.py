@@ -1,7 +1,5 @@
 from lab2.Optuna import *
 import sympy as sp
-from lab1.Pyplot import *
-from lab2.BFGS import BFGS
 
 x, y = sp.symbols('x y')
 
@@ -13,11 +11,19 @@ sympy_func = [
 ]
 
 if __name__ == "__main__":
-    # run_study(objective1)
-    # run_study(objective2)
-    # run_study(objective3)
-    # run_study(objective4)
-    run_study(objective5)
+
+    reals = [] # TODO: Fill
+    points = [] # points to call on # TODO: Fill
+    stop = SequenceEps(10 ** -6)
+    from Optuna import max_iterations
+    for i in range(1, 5):
+        def run_too_many_word(learn, objective):
+            return learn(run_study(objective, i, reals[i]), i, stop)
+
+        gd = run_too_many_word(learn_learning_rate_scheduling_constant, objective_learning_rate_scheduling_constant)
+        print_res(gd, points[i], max_iterations)
+        # TODO: copypaste
+
 
     # test_point = [np.longdouble(3), np.longdouble(-2)]
     # iter_max = 10 ** 4
@@ -30,7 +36,9 @@ if __name__ == "__main__":
     # show(func_table[3][0], rng, rng/20, 300, gd_scipy(startPoint=test_point, iterations=iter_max)[0])
 
     # gd = GradientDescent(func_table[3][0], func_table[3][1], Wolfe(12, 0.001, 0.1, 0.0001), SequenceEps(10 ** -6))
-    # gd = GradientDescent(func_table[3][0], func_table[3][1], BFGS(sympy_func[2], 1 / 2, 0.6, 0.0001, 0.5),
+    # gd = GradientDescent(func_table[3][0], func_table[3][1], BFGS(sympy_func[3], 1 / 2, 0.6, 0.0001, 0.5),
     #                      SequenceEps(10 ** -6))
     # rng = 2
     # show(func_table[3][0], rng, rng / 20, 300, gd(startPoint=test_point, iterations=5000)[0])
+
+
