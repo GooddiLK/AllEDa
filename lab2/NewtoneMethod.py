@@ -5,11 +5,16 @@ def get_model(dot_result, gradient, hess):
     return lambda p: dot_result + gradient @ p + (p.transpose @ hess @ p) / 2
 
 
+def dog_leg(model, C_dot, gradient, delta):
+    B_dot = find_minimum()
+
+
 def newtoneMethodStart(
         function,
         gradient_matrix_function,
         hess_matrix_function,
-        x0=0,
+        x0,
+        x1,
         delta=1,
         iteration_stop_limit=1e-5,
         max_iter: int = 100_000,
@@ -25,11 +30,11 @@ def newtoneMethodStart(
     cur_iter_number = 0
 
     prev_x = x0
-    cur_x = x0 + 1
+    cur_x = x1
     cur_result = function(cur_x)
 
     assert iteration_stop_limit < cur_x - prev_x
-    while np.linalg.norm(cur_x - prev_x) < iteration_stop_limit and max_iter < cur_iter_number:
+    while np.linalg.norm(cur_x - prev_x) < iteration_stop_limit and max_iter > cur_iter_number:
         gradient = gradient_matrix_function(cur_x)
         hess = hess_matrix_function(cur_x)
         hess_reversed = hess.__invert__()  # переделать потом можно -- вместо этого решать систему линейных уравнений
@@ -39,7 +44,7 @@ def newtoneMethodStart(
         is_trusted = False
 
         while not is_trusted:
-            A_dot = dog_leg(model, C_dot, gradient, delta)  # TODO dog leg
+            A_dot = cur_x + dog_leg(model, C_dot, gradient, delta)
             p_k = (cur_result - function(A_dot)) / (model(0) - model(A_dot - cur_x))
             if p_k > trust_upper_bound:
                 delta *= trust_changing_multiply_value
@@ -54,3 +59,5 @@ def newtoneMethodStart(
             is_trusted = True
             prev_x = cur_x
             cur_x = A_dot
+        cur_iter_number += 1
+
