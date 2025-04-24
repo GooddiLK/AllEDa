@@ -1,5 +1,3 @@
-import numpy as np
-
 from lab1.GradientDescent import GradientDescent
 
 
