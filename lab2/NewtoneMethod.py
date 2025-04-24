@@ -1,8 +1,8 @@
 import numpy as np
 
 
-def get_model(function, gradient_matrix_function, hess_matrix_function, xk):
-    return lambda p: function(xk) + gradient_matrix_function(xk) @ p + (p.transpose @ hess_matrix_function(xk) @ p) / 2
+def get_model(function, gradient, hess, xk):
+    return lambda p: function(xk) + gradient @ p + (p.transpose @ hess @ p) / 2
 
 
 def newtoneMethodStart(function, gradient_matrix_function, hess_matrix_function, x0=0, delta=1,
@@ -20,4 +20,10 @@ def newtoneMethodStart(function, gradient_matrix_function, hess_matrix_function,
 
     assert iteration_stop_limit < cur_x - prev_x
     while cur_x - prev_x < iteration_stop_limit and max_iter < cur_iter_number:
-        model = get_model(function, gradient_matrix_function, hess_matrix_function, cur_x)
+        gradient = gradient_matrix_function(cur_x)
+        hess = hess_matrix_function(cur_x)
+        np.array([[1, 2], [4, 5]])
+        hess_reversed = hess.__invert__()
+        model = get_model(function, gradient, hess, cur_x)
+        p = -hess_reversed @ gradient
+        C_dot = cur_x + learning_rate * p
