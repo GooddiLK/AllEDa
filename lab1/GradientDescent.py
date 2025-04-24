@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from StoppingCriteria import IterationsPlus
+from lab1.StoppingCriteria import IterationsPlus
 
 
 class GradientDescent:
