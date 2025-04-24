@@ -3,7 +3,7 @@ import math
 
 import numpy as np
 
-from lab1.StoppingCriteria import IterationsPlus
+from StoppingCriteria import IterationsPlus
 
 
 class GDException(Exception):

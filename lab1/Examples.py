@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-from lab1.GradientDescent import GradientDescent
+from GradientDescent import GradientDescent
 
 
 func_table = [
