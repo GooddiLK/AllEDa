@@ -6,6 +6,7 @@ from lab2.BFGS import BFGS
 x, y = sp.symbols('x y')
 
 sympy_func = [
+    None,
     x**2 + y**2,
     3 * x ** 2 + 10 * y ** 2 - 4 * x * y,
     (x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2
@@ -13,8 +14,10 @@ sympy_func = [
 
 if __name__ == "__main__":
     # run_study(objective1)
-    run_study(objective2)
-    run_study(objective3)
+    # run_study(objective2)
+    # run_study(objective3)
+    # run_study(objective4)
+    run_study(objective5)
 
     # test_point = [np.longdouble(3), np.longdouble(-2)]
     # iter_max = 10 ** 4

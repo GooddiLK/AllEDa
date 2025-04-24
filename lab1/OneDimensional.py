@@ -66,6 +66,7 @@ class BinarySearch:
 class Wolfe:
     def __init__(self, alpha_0, c1, c2, eps):
         if not (0 < c1 < c2 < 1):
+            print(c1, c2)
             raise Exception("Incorrect parameters")
         self.c1 = c1
         self.c2 = c2
