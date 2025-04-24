@@ -1,14 +1,31 @@
 import numpy as np
 
 
-def proizv(function, x, prev_x, result, prev_result):
-    return (x - prev_x) / (result - prev_result)
+def get_gradient(x, gradient_matrix):
+    return (gradient_matrix @ x).transpose
 
 
-def newtoneMethodStart(function, x0=0, step=1, iteration_stop_limit=1e-5, max_iter=100_000):
+def get_hess(x, hess_matrix):
+    return
+
+
+def get_model(function, gradient_matrix_function, hess_matrix_function, xk):
+    return lambda p: function(xk) + gradient_matrix_function(xk) @ p + (p.transpose @ hess_matrix_function(xk) @ p) / 2
+
+
+def newtoneMethodStart(function, gradient_matrix_function, hess_matrix_function, x0=0, delta=1,
+                       iteration_stop_limit=1e-5, max_iter=100_000, learning_rate=1):
+    assert max_iter > 0
+    assert iteration_stop_limit != 0
+    assert delta > 0
+
+    cur_iter_number = 0
+
     prev_x = x0
     prev_result = function(prev_x)
-    cur_x = x0/2 + 1
+    cur_x = x0 + 1
     cur_result = function(cur_x)
-    while True:
-        next_x = cur_x - function(x0) / (proizv(function, cur_x, prev_x, cur_result, prev_result)(x0))
+
+    assert iteration_stop_limit < cur_x - prev_x
+    while cur_x - prev_x < iteration_stop_limit and max_iter < cur_iter_number:
+        model = get_model(function, gradient_matrix_function, hess_matrix_function, cur_x)
