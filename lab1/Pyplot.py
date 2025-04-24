@@ -2,8 +2,6 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib import pyplot as plt
 import math
 import numpy as np
-from numpy import arange
-from numpy import meshgrid
 
 
 def to2(func):
@@ -14,9 +12,9 @@ def show(func, rng, grid, last_points, r):
     if last_points > 0:
         r = r[-last_points:]
     lx, ly = r[-1]
-    xaxis = arange(-rng + lx, rng + lx, grid)
-    yaxis = arange(-rng + ly, rng + ly, grid)
-    x, y = meshgrid(xaxis, yaxis)
+    xaxis = np.arange(-rng + lx, rng + lx, grid)
+    yaxis = np.arange(-rng + ly, rng + ly, grid)
+    x, y = np.meshgrid(xaxis, yaxis)
     results = to2(func)(x, y)
     figure = plt.figure()
     axis = figure.add_subplot(111, projection='3d')
