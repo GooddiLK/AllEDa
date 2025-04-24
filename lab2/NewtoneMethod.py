@@ -1,14 +1,6 @@
 import numpy as np
 
 
-def get_gradient(x, gradient_matrix):
-    return (gradient_matrix @ x).transpose
-
-
-def get_hess(x, hess_matrix):
-    return
-
-
 def get_model(function, gradient_matrix_function, hess_matrix_function, xk):
     return lambda p: function(xk) + gradient_matrix_function(xk) @ p + (p.transpose @ hess_matrix_function(xk) @ p) / 2
 
