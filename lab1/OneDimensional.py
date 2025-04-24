@@ -4,6 +4,7 @@
 
 
 import numpy as np
+from utils import *
 
 
 # Вычисление одной из частей условия Армихо
@@ -75,3 +76,34 @@ class Wolfe:
     def learning_rate(self, gd):
         bs = BinarySearch(self.eps)
         return bs(gd, gd.history()[-1], self.c1, self.c2, 0, self.alpha_0)
+
+# принимает функцию,
+# принимает q и c1 для функции ищущей следующий подходящий alpha для метода Армихо
+class BFGS:
+    def __init__(self, func, alpha_0, q, eps, c1, dem=2):
+        vars = sp.symbols('x y')
+        self.grad = compute_gradient(func, vars)
+        self.bctrk = Backtracking(alpha_0, q, eps, c1)
+        self.hess = np.eye(dem)
+
+    def learning_rate(self, gd):
+        x = gd.history()[-1]
+        x = np.array(x)
+        cur_grad = self.grad(*x)
+        gd.vector = -self.hess @ cur_grad
+
+        a = self.bctrk.calculate_alpha(gd, x)
+
+        s = a * gd.vector
+        x_new = x + s
+        delta_grad = np.array(self.grad(*x_new)) - cur_grad
+
+        rho = 1.0 / np.dot(delta_grad, s)
+        I = np.eye(len(s))
+        A1 = I - rho * s[:, np.newaxis] * delta_grad[np.newaxis, :]
+        A2 = I - rho * delta_grad[:, np.newaxis] * s[np.newaxis, :]
+
+        self.hess = np.dot(A1, np.dot(self.hess, A2)) + (self.hess * s[:, np.newaxis] *
+                                           s[np.newaxis, :])
+
+        return a
