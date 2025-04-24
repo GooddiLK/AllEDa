@@ -7,6 +7,8 @@ def get_model(dot_result, gradient, hess):
 
 def dog_leg(model, C_dot, gradient, delta):
     B_dot = find_minimum()
+    A_dot = find_intersect(fromDot=B_dot, path=-B_dot + C_dot, sphereRadius=delta)
+    return A_dot
 
 
 def newtoneMethodStart(
@@ -40,12 +42,12 @@ def newtoneMethodStart(
         hess_reversed = hess.__invert__()  # переделать потом можно -- вместо этого решать систему линейных уравнений
         model = get_model(cur_result, gradient, hess)
         p = -hess_reversed @ gradient
-        C_dot = cur_x + learning_rate * p
+        C_dot = learning_rate * p
         is_trusted = False
 
         while not is_trusted:
-            A_dot = cur_x + dog_leg(model, C_dot, gradient, delta)
-            p_k = (cur_result - function(A_dot)) / (model(0) - model(A_dot - cur_x))
+            A_dot = dog_leg(model, C_dot, gradient, delta)
+            p_k = (cur_result - function(A_dot + cur_x)) / (model(0) - model(A_dot - cur_x))
             if p_k > trust_upper_bound:
                 delta *= trust_changing_multiply_value
             elif p_k > trust_lower_bound:
@@ -60,4 +62,3 @@ def newtoneMethodStart(
             prev_x = cur_x
             cur_x = A_dot
         cur_iter_number += 1
-
