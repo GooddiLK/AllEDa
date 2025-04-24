@@ -4,6 +4,7 @@ from random import randint
 from lab1.Examples import *
 from lab1.GradientDescent import GDException
 from lab1.LearningRateScheduling import LearningRateSchedulingConstant, LearningRateSchedulingExponential
+from lab1.OneDimensional import Armijo
 from lab1.StoppingCriteria import *
 
 max_iterations = 5 * 10 ** 3
@@ -20,6 +21,7 @@ def run_study(objective, n_trials=50):
     study = opt.create_study(direction="minimize")
     study.optimize(objective, n_trials=n_trials)
     print("Лучшие параметры:", study.best_params)
+    print("Лучшее значение:", study.best_value)
 
 
 # Runs objective with provided gradient descent and point it should find
@@ -58,3 +60,13 @@ def objective2(trial):
     gd = grad_des_instance(2, learning_rate, stopping_criteria)
     return run_objective(gd, [0, 0])
 
+
+# Optimizing GD with Armijo on function 2
+def objective3(trial):
+    alpha_0 = trial.suggest_float('alpha_0', 1e-5, 10, log=True)
+    q = trial.suggest_float('q', 1e-5, 1, log=True)
+    epsilon = trial.suggest_float('epsilon', 1e-10, 1, log=True)
+    c1 = trial.suggest_float('c1', 1e-5, 1, log=True)
+    armijo = Armijo(alpha_0, q, epsilon, c1)
+    gd = grad_des_instance(2, armijo, stopping_criteria)
+    return run_objective(gd, [0, 0])

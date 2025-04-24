@@ -14,9 +14,10 @@ sympy_func = [
 if __name__ == "__main__":
     # run_study(objective1)
     run_study(objective2)
+    run_study(objective3)
 
-    test_point = [np.longdouble(3), np.longdouble(-2)]
-    iter_max = 10 ** 4
+    # test_point = [np.longdouble(3), np.longdouble(-2)]
+    # iter_max = 10 ** 4
     # Newton-CG с использованием scipy
     # gd_scipy = GradientDescentWithScipy(func=sympy_func[2] , method="Newton-CG")
 
@@ -26,7 +27,7 @@ if __name__ == "__main__":
     # show(func_table[3][0], rng, rng/20, 300, gd_scipy(startPoint=test_point, iterations=iter_max)[0])
 
     # gd = GradientDescent(func_table[3][0], func_table[3][1], Wolfe(12, 0.001, 0.1, 0.0001), SequenceEps(10 ** -6))
-    gd = GradientDescent(func_table[3][0], func_table[3][1], BFGS(sympy_func[2], 1 / 2, 0.6, 0.0001, 0.5),
-                         SequenceEps(10 ** -6))
-    rng = 2
-    show(func_table[3][0], rng, rng / 20, 300, gd(startPoint=test_point, iterations=5000)[0])
+    # gd = GradientDescent(func_table[3][0], func_table[3][1], BFGS(sympy_func[2], 1 / 2, 0.6, 0.0001, 0.5),
+    #                      SequenceEps(10 ** -6))
+    # rng = 2
+    # show(func_table[3][0], rng, rng / 20, 300, gd(startPoint=test_point, iterations=5000)[0])
