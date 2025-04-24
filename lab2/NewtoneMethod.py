@@ -11,11 +11,46 @@ def get_model(dot_result, gradient, hess):
 def find_minimum(mop, gd):
     return gd.next_point(gd.history()[-1], mop.learning_rate(gd))
 
-def dog_leg(model, C_dot, gradient, delta):
+
+def find_intersect(fromDot, path, sphereRadius):  # need to check
+    a = np.dot(path, path)
+    if a == 0:
+        if np.linalg.norm(fromDot) == sphereRadius:
+            return fromDot
+        else:
+            return fromDot
+
+    b = 2 * np.dot(fromDot, path)
+    c = np.dot(fromDot, fromDot) - sphereRadius ** 2
+    discriminant = b ** 2 - 4 * a * c
+
+    if discriminant < 0:
+        t_min = - (np.dot(fromDot, path)) / a
+        t_clipped = np.clip(t_min, 0.0, 1.0)
+    else:
+        sqrt_discriminant = np.sqrt(discriminant)
+        t1 = (-b + sqrt_discriminant) / (2 * a)
+        t2 = (-b - sqrt_discriminant) / (2 * a)
+
+        valid_ts = [t for t in [t1, t2] if 0 <= t <= 1]
+        if valid_ts:
+            t_clipped = min(valid_ts)
+        else:
+            norm_from = np.linalg.norm(fromDot)
+            norm_to = np.linalg.norm(fromDot + path)
+            if abs(norm_from - sphereRadius) <= abs(norm_to - sphereRadius):
+                t_clipped = 0.0
+            else:
+                t_clipped = 1.0
+    return fromDot + t_clipped * path
+
+
+def dog_leg(function, xk, model, C_dot, gradient, delta, gradient_matrix_function):
     mop = Wolfe(12, 0.001, 0.1, 0.0001)
-    gd = GradientDescent(None, None, mop, None)
-    gd.vector = gradient
-    gd.history().append(np.array([0, 0]).astype(np.longdouble))
+    gd = GradientDescent(function, gradient_matrix_function, mop, None)
+    gd.vector = -gradient
+    gd.history().append(xk.astype(np.longdouble))
+
     B_dot = find_minimum(mop, gd)
     A_dot = find_intersect(fromDot=B_dot, path=-B_dot + C_dot, sphereRadius=delta)
     return A_dot
@@ -23,11 +58,12 @@ def dog_leg(model, C_dot, gradient, delta):
 
 def newtoneMethodStart(
         function,
-        gradient_matrix_function,
-        hess_matrix_function,
-        x0,
-        x1,
-        delta=1,
+        gradient_matrix_function,  # function gives a gradient in the dot i provide
+        hess_matrix_function,  # function gives a hess in the dot i provide
+        power,  # размерность пространства (idk in english sorry)
+        x0,  # точка в пространстве начальная
+        x1,  # ещё одна точка в пространстве, отличная от начальной больше, чем на минимум
+        delta=1,  # начальная дельта
         iteration_stop_limit=1e-5,
         max_iter: int = 100_000,
         learning_rate=1,
@@ -56,7 +92,8 @@ def newtoneMethodStart(
 
         while not is_trusted:
             A_dot = dog_leg(model, C_dot, gradient, delta)
-            p_k = (cur_result - function(A_dot + cur_x)) / (model(np.array([0]*m)) - model(A_dot - cur_x))  # m is power
+            p_k = (cur_result - function(A_dot + cur_x)) / (
+                    model(np.array([0] * power)) - model(A_dot - cur_x))
             if p_k > trust_upper_bound:
                 delta *= trust_changing_multiply_value
             elif p_k > trust_lower_bound:
