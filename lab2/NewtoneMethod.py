@@ -30,7 +30,6 @@ def newtoneMethodStart(
     assert delta > 0
 
     cur_iter_number = 0
-
     prev_x = x0
     cur_x = x1
     cur_result = function(cur_x)
@@ -47,7 +46,7 @@ def newtoneMethodStart(
 
         while not is_trusted:
             A_dot = dog_leg(model, C_dot, gradient, delta)
-            p_k = (cur_result - function(A_dot + cur_x)) / (model(0) - model(A_dot - cur_x))
+            p_k = (cur_result - function(A_dot + cur_x)) / (model(np.array([0]*m)) - model(A_dot - cur_x))  # m is power
             if p_k > trust_upper_bound:
                 delta *= trust_changing_multiply_value
             elif p_k > trust_lower_bound:
