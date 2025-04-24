@@ -1,12 +1,22 @@
 import numpy as np
 
+from lab1.GradientDescent import GradientDescent
+from lab1.OneDimensional import Wolfe
+
 
 def get_model(dot_result, gradient, hess):
     return lambda p: dot_result + gradient @ p + (p.transpose @ hess @ p) / 2
 
 
+def find_minimum(mop, gd):
+    return gd.next_point(gd.history()[-1], mop.learning_rate(gd))
+
 def dog_leg(model, C_dot, gradient, delta):
-    B_dot = find_minimum()
+    mop = Wolfe(12, 0.001, 0.1, 0.0001)
+    gd = GradientDescent(None, None, mop, None)
+    gd.vector = gradient
+    gd.history().append(np.array([0, 0]).astype(np.longdouble))
+    B_dot = find_minimum(mop, gd)
     A_dot = find_intersect(fromDot=B_dot, path=-B_dot + C_dot, sphereRadius=delta)
     return A_dot
 
