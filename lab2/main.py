@@ -7,13 +7,14 @@ sympy_func = [
     None,
     x**2 + y**2,
     3 * x ** 2 + 10 * y ** 2 - 4 * x * y,
-    (x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2
+    (x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2,
+    20 + (x**2 - 10 * sp.cos(2 * sp.pi * x)) + (y**2 - 10 * sp.cos(2 * sp.pi * y)),
 ]
 
 if __name__ == "__main__":
 
-    reals = [] # TODO: Fill
-    points = [] # points to call on # TODO: Fill
+    reals = [(0, 0),(0, 0),(0, 0),(3, 2), (0, 0)] # TODO: Fill
+    points = [(2, 2),(2, 2),(2, 2),(2, 2), (2, 2)] # points to call on # TODO: Fill
     stop = SequenceEps(10 ** -6)
     from Optuna import max_iterations
     for i in range(1, 5):
@@ -31,9 +32,9 @@ if __name__ == "__main__":
     # gd_scipy = GradientDescentWithScipy(func=sympy_func[2] , method="Newton-CG")
 
     # BFGS с использованием scipy
-    # gd_scipy = GradientDescentWithScipy(func=sympy_func[2], method="BFGS")
-    # res = gd_scipy((1, 1), iter_max)
-    # show(func_table[3][0], rng, rng/20, 300, gd_scipy(startPoint=test_point, iterations=iter_max)[0])
+    gd_scipy = GradientDescentWithScipy(func=sympy_func[2], method="BFGS")
+    res = gd_scipy((1, 1), iter_max)
+    show(func_table[3][0], rng, rng/20, 300, gd_scipy(startPoint=test_point, iterations=iter_max)[0])
 
     # gd = GradientDescent(func_table[3][0], func_table[3][1], Wolfe(12, 0.001, 0.1, 0.0001), SequenceEps(10 ** -6))
     # gd = GradientDescent(func_table[3][0], func_table[3][1], BFGS(sympy_func[3], 1 / 2, 0.6, 0.0001, 0.5),

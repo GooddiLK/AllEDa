@@ -28,5 +28,5 @@ if __name__ == "__main__":
 
     gd = GradientDescent(func_table[4][0], func_table[2][1], Wolfe(12, 0.001, 0.1, 0.0001), SequenceEps(10 ** -6))
     # graphic:
-    rng = 2
+    rng = 5
     show(func_table[4][0], rng, rng/20, 300, gd([3, 3], 5 * 10**3)[0])
