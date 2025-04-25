@@ -1,4 +1,6 @@
 from lab2.Optuna import *
+from lab2.GradientDescentWithSciPy import *
+from lab1.Pyplot import *
 import sympy as sp
 
 x, y = sp.symbols('x y')
@@ -26,13 +28,14 @@ if __name__ == "__main__":
         # TODO: copypaste
 
 
-    # test_point = [np.longdouble(3), np.longdouble(-2)]
-    # iter_max = 10 ** 4
+    test_point = [np.longdouble(3), np.longdouble(-2)]
+    iter_max = 10 ** 4
+    rng = 5
     # Newton-CG с использованием scipy
     # gd_scipy = GradientDescentWithScipy(func=sympy_func[2] , method="Newton-CG")
 
     # BFGS с использованием scipy
-    gd_scipy = GradientDescentWithScipy(func=sympy_func[2], method="BFGS")
+    gd_scipy = GradientDescentWithSciPy(func=sympy_func[3], method="BFGS")
     res = gd_scipy((1, 1), iter_max)
     show(func_table[3][0], rng, rng/20, 300, gd_scipy(startPoint=test_point, iterations=iter_max)[0])
 
