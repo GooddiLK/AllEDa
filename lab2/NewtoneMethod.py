@@ -5,7 +5,7 @@ from lab1.OneDimensional import Wolfe
 
 
 def get_model(dot_result, gradient, hess):
-    return lambda p: dot_result + gradient @ p + (p.transpose @ hess @ p) / 2
+    return lambda p: dot_result + gradient @ p + (p.transpose() @ hess @ p) / 2
 
 
 def find_minimum(mop, gd):
@@ -46,6 +46,8 @@ def dog_leg(gd, xk, C_dot, delta):
     gd.history().append(xk.astype(np.longdouble))
 
     B_dot = find_minimum(gd.learningRateCalculator, gd) - xk
+    if delta > np.linalg.norm(B_dot):
+        return B_dot
     A_dot = find_intersect(fromDot=B_dot, path=-B_dot + C_dot, sphereRadius=delta)
     return A_dot
 
@@ -76,22 +78,21 @@ def newtoneMethodStart(
     cur_x = x1
     cur_result = gd.func(cur_x)
 
-
     assert iteration_stop_limit < np.linalg.norm(cur_x - prev_x)
     while np.linalg.norm(cur_x - prev_x) > iteration_stop_limit and max_iter > cur_iter_number:
+        cur_result = gd.func(cur_x)
         gradient = gd.grad(cur_x)
         hess = hess_matrix_function(cur_x)
         hess_reversed = hess.__invert__()  # переделать потом можно -- вместо этого решать систему линейных уравнений
         model = get_model(cur_result, gradient, hess)
-        p = -hess_reversed @ gradient
-        C_dot = learning_rate * p
+        p = hess_reversed @ gradient
+        C_dot = cur_x - learning_rate * p
         is_trusted = False
 
         while not is_trusted:
             gd.vector = -gradient
             A_dot = dog_leg(gd, cur_x, C_dot, delta)
-            p_k = (cur_result - gd.func(A_dot + cur_x)) / (
-                    cur_result - model(A_dot))
+            p_k = (cur_result - gd.func(A_dot + cur_x)) / (cur_result - model(A_dot))
             if p_k > trust_upper_bound:
                 delta *= trust_changing_multiply_value
             elif p_k > trust_lower_bound:
@@ -104,7 +105,7 @@ def newtoneMethodStart(
                 continue
             is_trusted = True
             prev_x = cur_x
-            cur_x = A_dot
+            cur_x = A_dot + cur_x
         cur_iter_number += 1
     return [cur_x, cur_result]
 
