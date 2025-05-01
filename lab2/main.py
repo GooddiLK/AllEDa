@@ -19,7 +19,11 @@ if __name__ == "__main__":
     from Optuna import max_iterations
     for i in range(1, 5):
         def run_too_many_word(learn, objective):
-            return learn(run_study(objective, i, reals[i]), i, stop)
+            study = run_study(objective, i, reals[i])
+            print_study(study)
+            return learn(study, i, stop)
+        print(i)
+        print("------------------------------------------------------------------------")
         gd = run_too_many_word(learn_learning_rate_scheduling_constant, objective_learning_rate_scheduling_constant)
         print_res(gd, points[i], max_iterations, "learning_rate_scheduling_constant")
         gd = run_too_many_word(learn_learning_rate_scheduling_exponential, objective_learning_rate_scheduling_exponential)
@@ -34,6 +38,7 @@ if __name__ == "__main__":
         print_res(gd_scipy, points[i], max_iterations, "scipy BFGS")
         gd_scipy = GradientDescentWithSciPy(func=sympy_func[i], method="Newton-CG")
         print_res(gd_scipy, points[i], max_iterations, "scipy Newton-CG")
+        print("------------------------------------------------------------------------\n\n\n")
 
     # rng = 5
     # show(func_table[3][0], rng, rng/20, 300, gd_scipy(startPoint=test_point, iterations=iter_max)[0])
