@@ -8,22 +8,26 @@ from lab1.OneDimensional import Armijo, Wolfe
 from lab1.StoppingCriteria import *
 from lab2.BFGS import BFGS
 from lab2.main import sympy_func
+import logging
 
 max_iterations = 5 * 10 ** 3
 eps = 10 ** -4
 stopping_criteria = SequenceEps(eps)
 big_constant = 10 ** 18
+log = True
+show_progress = True
 
-
+# Функция по которой optuna оптимизирует параметры
 def optimizing_func(func_calc, grad_calc, found, real):
     return func_calc + grad_calc + big_constant * np.linalg.norm(real - found)
 
-
+# Запуск оптимизации optuna
 def run_study(pre_objective, func_number, real, n_trials=50):
+    logging.getLogger("optuna").setLevel(logging.WARNING)
     study = opt.create_study(direction="minimize")
     def objective(trial):
         return pre_objective(trial, func_number, real)
-    study.optimize(objective, n_trials=n_trials)
+    study.optimize(objective, n_trials=n_trials, show_progress_bar=show_progress)
     return study
 
 
@@ -55,8 +59,15 @@ def run_objective(gd, real, point_from=None, delta=50, number_of=40):
     return result
 
 
+# Все функции trial_* возвращает объект инициализируют trial optuna и возвращают объект градиентного спуска,
+# который будет использоваться.
+#
+# Все функции objective_* возвращает объект, который optuna должна минимизировать.
+#
+# Все функции learn_* возвращает объект градиентного спуска, который optuna получила при оптимизации
+
 def trial_learning_rate_scheduling_constant(trial):
-    learning_rate_0 = trial.suggest_float('learning_rate', 1e-10, 1, log=True)
+    learning_rate_0 = trial.suggest_float('learning_rate', 1e-10, 1, log=log)
     return LearningRateSchedulingConstant(learning_rate_0)
 
 
@@ -73,8 +84,8 @@ def learn_learning_rate_scheduling_constant(study, func_number, stop):
 
 
 def trial_learning_rate_scheduling_exponential(trial):
-    h0 = trial.suggest_float('h0', 1e-10, 1, log=True)
-    lambda_param = trial.suggest_float('lambda_param', 1e-10, 1, log=True)
+    h0 = trial.suggest_float('h0', 1e-10, 1, log=log)
+    lambda_param = trial.suggest_float('lambda_param', 1e-10, 1, log=log)
     return LearningRateSchedulingExponential(h0, lambda_param)
 
 
@@ -91,10 +102,10 @@ def learn_learning_rate_scheduling_exponential(study, func_number, stop):
 
 
 def trial_armijo(trial):
-    alpha_0 = trial.suggest_float('alpha_0', 1e-5, 10, log=True)
-    q = trial.suggest_float('q', 1e-5, 1, log=True)
-    epsilon = trial.suggest_float('epsilon', 1e-10, 1, log=True)
-    c1 = trial.suggest_float('c1', 1e-5, 1, log=True)
+    alpha_0 = trial.suggest_float('alpha_0', 1e-5, 10, log=log)
+    q = trial.suggest_float('q', 1e-5, 1, log=log)
+    epsilon = trial.suggest_float('epsilon', 1e-10, 1, log=log)
+    c1 = trial.suggest_float('c1', 1e-5, 1, log=log)
     return Armijo(alpha_0, q, epsilon, c1)
 
 # Optimizing GD with Armijo
@@ -110,10 +121,10 @@ def learn_armijo(study, func_number, stop):
 
 
 def trial_wolfe(trial):
-    alpha_0 = trial.suggest_float('alpha_0', 1e-5, 10, log=True)
-    epsilon = trial.suggest_float('epsilon', 1e-10, 1, log=True)
-    c2 = trial.suggest_float('c2', 1e-6, 1, log=True)
-    c1 = trial.suggest_float('c1', 1e-8, c2, log=True)
+    alpha_0 = trial.suggest_float('alpha_0', 1e-5, 10, log=log)
+    epsilon = trial.suggest_float('epsilon', 1e-10, 1, log=log)
+    c2 = trial.suggest_float('c2', 1e-6, 1, log=log)
+    c1 = trial.suggest_float('c1', 1e-8, c2, log=log)
     return Wolfe(alpha_0, c1, c2, epsilon)
 
 
@@ -130,10 +141,10 @@ def learn_wolfe(study, func_number, stop):
 
 
 def trial_bfgs(trial, func_number):
-    alpha_0 = trial.suggest_float('alpha_0', 1e-5, 10, log=True)
-    epsilon = trial.suggest_float('epsilon', 1e-10, 1, log=True)
-    c1 = trial.suggest_float('c1', 1e-5, 1, log=True)
-    q = trial.suggest_float('q', 1e-5, 1, log=True)
+    alpha_0 = trial.suggest_float('alpha_0', 1e-5, 10, log=log)
+    epsilon = trial.suggest_float('epsilon', 1e-10, 1, log=log)
+    c1 = trial.suggest_float('c1', 1e-5, 1, log=log)
+    q = trial.suggest_float('q', 1e-5, 1, log=log)
     return BFGS(sympy_func[func_number], alpha_0, q, epsilon, c1)
 
 # Optimizing BFGS

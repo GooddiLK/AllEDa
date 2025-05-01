@@ -31,10 +31,16 @@ def run(gd, point, iterations):
     return gd(point, iterations)
 
 
-def print_res(gd_inst, point, iterations):
+def print_res(gd_inst, point, iterations, name=None):
+    if name is not None:
+        print(name)
     r = run(gd_inst, point, iterations)
     print("кол-во итераций + конечная точка")
     print(len(r[0]), r[0][-1])
     print("кол-во вызовов функции и ее производной")
-    print(r[1:])
+    print(r[1:3])
+    r = r[3:]
+    if len(r):
+        print("остальная информация") # кол-во вычислений гессиана(если использовался)
+        print(r)
     print("---------------------------------------")
