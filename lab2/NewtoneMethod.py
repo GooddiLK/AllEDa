@@ -1,6 +1,8 @@
+import math
+
 import numpy as np
 
-from lab1.GradientDescent import GradientDescent
+from lab1.GradientDescent import GradientDescent, GDException
 from lab1.OneDimensional import Wolfe
 
 
@@ -76,6 +78,9 @@ def newtoneMethodStart(
     assert iteration_stop_limit > 0
     assert delta > 0
 
+    x0 = np.array(x0).astype(np.longdouble)
+    x1 = np.array(x1).astype(np.longdouble)
+
     mop = Wolfe(alpha_0, c1, c2, iteration_stop_limit)
     gd = GradientDescent(function, gradient_matrix_function, mop, None)
 
@@ -127,8 +132,11 @@ def newtoneMethodStart(
             is_trusted = True
             prev_x = cur_x
             cur_x = A_dot + cur_x
+            for i in cur_x:
+                if math.isnan(i):
+                    raise GDException()
         cur_iter_number += 1
-    return [[cur_x] * 1, gd.__funcCalculation__ , gd.__gradCalculation__, hessCalculation]
+    return [[cur_x], gd.__funcCalculation__ , gd.__gradCalculation__, hessCalculation]
 
 
 if __name__ == '__main__':
@@ -137,11 +145,7 @@ if __name__ == '__main__':
     print(newtoneMethodStart(
         function=lambda vector: (vector[0] - 2) ** 2 + (vector[1] + 1) ** 2 - 10,
         gradient_matrix_function=lambda vector: np.array([2 * vector[0] - 4, 2 * vector[1] + 2]).astype(np.double),
-        hess_matrix_function=lambda vector: np.array([[2, 0], [0, 2]]).astype(
-            # function=lambda vector: (vector[0] - 2) ** 4 + vector[1] ** 4 - 10,
-            # gradient_matrix_function=lambda vector: np.array([4 * vector[0] ** 3, 4 * vector[1] ** 3]).astype(np.double),
-            # hess_matrix_function=lambda vector: np.array([[6 * vector[0] ** 2, 0], [0, 6 * vector[1] ** 2]]).astype(
-            np.double),
+        hess_matrix_function=lambda vector: np.array([[2, 0], [0, 2]]).astype(np.double),
         x0=x0,
         x1=x1,
         alpha_0=12,

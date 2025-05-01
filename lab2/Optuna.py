@@ -8,6 +8,7 @@ from lab1.OneDimensional import Armijo, Wolfe
 from lab1.StoppingCriteria import *
 from lab2.BFGS import BFGS
 from lab2.main import sympy_func
+from lab2.NewtoneMethod import newtoneMethodStart
 import logging
 
 max_iterations = 5 * 10 ** 3
@@ -158,4 +159,88 @@ def learn_bfgs(study, func_number, stop):
     bfgs = BFGS(sympy_func[func_number], study.best_params["alpha_0"], study.best_params["q"], study.best_params["epsilon"], study.best_params["c1"])
     return grad_des_instance(func_number, bfgs, stop)
 
-# TODO: Add newton
+def optimizing_func_newton(func_calc, grad_calc, hess_calc, found, real):
+    return func_calc + grad_calc + hess_calc + big_constant * np.linalg.norm(real - found)
+
+def run_objective_newton(newton, real, point_from=None, delta=50, number_of=40):
+    if point_from is None:
+        point_from = real
+    dims = len(real)
+    real = np.array(real).astype(np.longdouble)
+    point_from = np.array(point_from).astype(np.longdouble)
+    result = 0
+    for i in range(number_of):
+        point1 = [0] * dims
+        for j in range(dims):
+            point1[j] = randint(int(point_from[j] - delta), int(point_from[j] + delta))
+        point1 = np.array(point1).astype(np.longdouble)
+        point2 = [0] * dims
+        for j in range(dims):
+            point2[j] = randint(int(point_from[j] - delta), int(point_from[j] + delta))
+        point2 = np.array(point2).astype(np.longdouble)
+        try:
+            h, func_calc, grad_calc, hess_calc = newton(point1, point2)
+        except GDException as _:
+            result += big_constant ** 2
+            continue
+        one_result = optimizing_func_newton(func_calc, grad_calc, hess_calc, h[-1], real)
+        result += one_result
+    return result
+
+
+def extract_newton(func_number, alpha_0, iteration_stop_limit, c2, c1, delta, learning_rate, trust_upper_bound,
+    trust_lower_bound, trust_no_trust_bound, trust_changing_multiply_value):
+    def newton(x0, x1):
+        return newtoneMethodStart(
+            func_table[func_number][0],
+            func_table[func_number][1],
+            func_table[func_number][2],
+            x0,
+            x1,
+            alpha_0,
+            c1,
+            c2,
+            delta,
+            iteration_stop_limit,
+            max_iterations,
+            learning_rate,
+            trust_upper_bound,
+            trust_lower_bound,
+            trust_no_trust_bound,
+            trust_changing_multiply_value,
+        )
+    return newton
+
+def trial_newton(trial, func_number):
+    alpha_0 = trial.suggest_float('alpha_0', 1e-2, 10, log=log)
+    iteration_stop_limit = trial.suggest_float('iteration_stop_limit', 1e-10, 0.1, log=log)
+    c2 = trial.suggest_float('c2', 1e-2, 0.8, log=log)
+    c1 = trial.suggest_float('c1', 1e-7, c2 / 10, log=log)
+    delta = trial.suggest_float('delta', 1e-2, 10, log=log)
+    learning_rate = trial.suggest_float('learning_rate', 1e-2, 5, log=log)
+    trust_upper_bound = trial.suggest_float('trust_upper_bound', 0.5, 0.9999, log=log)
+    trust_lower_bound = trial.suggest_float('trust_lower_bound', 1e-2, 0.5, log=log)
+    trust_no_trust_bound = trial.suggest_float('trust_no_trust_bound', 1e-3, trust_lower_bound / 2, log=log)
+    trust_changing_multiply_value = trial.suggest_float('trust_changing_multiply_value', 1, 10, log=log)
+    return extract_newton(func_number, alpha_0, iteration_stop_limit, c2, c1, delta, learning_rate,
+                          trust_upper_bound, trust_lower_bound, trust_no_trust_bound, trust_changing_multiply_value)
+
+# Optimizing Newton
+def objective_newton(trial, func_number, real):
+    newton = trial_newton(trial, func_number)
+    return run_objective_newton(newton, real)
+
+def learn_newton(study, func_number, _):
+    return extract_newton(
+        func_number,
+        study.best_params["alpha_0"],
+        study.best_params["iteration_stop_limit"],
+        study.best_params["c2"],
+        study.best_params["c1"],
+        study.best_params["delta"],
+        study.best_params["learning_rate"],
+        study.best_params["trust_upper_bound"],
+        study.best_params["trust_lower_bound"],
+        study.best_params["trust_no_trust_bound"],
+        study.best_params["trust_changing_multiply_value"],
+    )
