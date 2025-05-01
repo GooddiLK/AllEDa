@@ -77,7 +77,7 @@ def newtoneMethodStart(
     cur_result = function(cur_x)
 
     assert iteration_stop_limit < np.linalg.norm(cur_x - prev_x)
-    while np.linalg.norm(cur_x - prev_x) < iteration_stop_limit and max_iter > cur_iter_number:
+    while np.linalg.norm(cur_x - prev_x) > iteration_stop_limit and max_iter > cur_iter_number:
         gradient = gradient_matrix_function(cur_x)
         hess = hess_matrix_function(cur_x)
         hess_reversed = hess.__invert__()  # переделать потом можно -- вместо этого решать систему линейных уравнений
@@ -109,10 +109,10 @@ def newtoneMethodStart(
 
 x0 = np.array([0, 0])
 x1 = np.array([0, 1])
-newtoneMethodStart(
+print(newtoneMethodStart(
     function=lambda vector: vector[0] ^ 2 + vector[1] ^ 2,
     gradient_matrix_function=lambda vector: np.array([2 * vector[0], 2 * vector[1]]),
-    hess_matrix_function=lambda vector: np.array([2, 0], [0, 2]),
+    hess_matrix_function=lambda vector: np.array([[2, 0], [0, 2]]),
     x0=x0,
     x1=x1,
-)
+))
