@@ -44,10 +44,11 @@ def find_intersect(fromDot, path, sphereRadius):  # need to check
 
 def dog_leg(gd, xk, C_dot, delta):
     gd.history().append(xk.astype(np.longdouble))
-
-    B_dot = find_minimum(gd.learningRateCalculator, gd) - xk
-    if delta > np.linalg.norm(B_dot):
-        return B_dot
+    if delta >= np.linalg.norm(C_dot):
+        return C_dot
+    B_dot = find_minimum(gd.learningRateCalculator, gd)
+    if delta <= np.linalg.norm(B_dot):
+        return B_dot / (np.linalg.norm(B_dot) / delta)
     A_dot = find_intersect(fromDot=B_dot, path=-B_dot + C_dot, sphereRadius=delta)
     return A_dot
 
@@ -65,7 +66,7 @@ def newtoneMethodStart(
         c2,
         delta=1,  # начальная дельта
         iteration_stop_limit=0.000001,  # accuracy
-        max_iter: int = 100_000,
+        max_iter: int = 100_000_000,
         learning_rate=1,
         trust_upper_bound=3 / 4,
         trust_lower_bound=1 / 4,
@@ -103,16 +104,16 @@ def newtoneMethodStart(
         cur_result = gd.func(cur_x)
         gradient = gd.grad(cur_x)
         hess = hessF(cur_x)
-        hess_reversed = hess.__invert__()  # переделать потом можно -- вместо этого решать систему линейных уравнений
+        hess_reversed = np.linalg.inv(hess)  # переделать потом можно -- вместо этого решать систему линейных уравнений
         model = get_model(cur_result, gradient, hess)
-        p = hess_reversed @ gradient
-        C_dot = cur_x - learning_rate * p
+        C_dot = -hess_reversed @ gradient
         is_trusted = False
 
         while not is_trusted:
             gd.vector = -gradient
             A_dot = dog_leg(gd, cur_x, C_dot, delta)
-            p_k = (cur_result - gd.func(A_dot + cur_x)) / (cur_result - model(A_dot))
+            p_k = (cur_result - gd.func(A_dot + cur_x) + iteration_stop_limit / 16) / (
+                    cur_result - model(A_dot) + iteration_stop_limit / 16)
             if p_k > trust_upper_bound:
                 delta *= trust_changing_multiply_value
             elif p_k > trust_lower_bound:
@@ -131,12 +132,16 @@ def newtoneMethodStart(
 
 
 if __name__ == '__main__':
-    x0 = np.array([19, 0])
-    x1 = np.array([-10, 43])
+    x0 = np.array([0.0, 0])
+    x1 = np.array([120, 22])
     print(newtoneMethodStart(
-        function=lambda vector: vector[0] ** 2 + vector[1] ** 2,
-        gradient_matrix_function=lambda vector: np.array([2 * vector[0], 2 * vector[1]]),
-        hess_matrix_function=lambda vector: np.array([[2, 0], [0, 2]]),
+        function=lambda vector: (vector[0] - 2) ** 2 + (vector[1] + 1) ** 2 - 10,
+        gradient_matrix_function=lambda vector: np.array([2 * vector[0] - 4, 2 * vector[1] + 2]).astype(np.double),
+        hess_matrix_function=lambda vector: np.array([[2, 0], [0, 2]]).astype(
+            # function=lambda vector: (vector[0] - 2) ** 4 + vector[1] ** 4 - 10,
+            # gradient_matrix_function=lambda vector: np.array([4 * vector[0] ** 3, 4 * vector[1] ** 3]).astype(np.double),
+            # hess_matrix_function=lambda vector: np.array([[6 * vector[0] ** 2, 0], [0, 6 * vector[1] ** 2]]).astype(
+            np.double),
         x0=x0,
         x1=x1,
         alpha_0=12,
