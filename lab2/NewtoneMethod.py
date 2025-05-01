@@ -59,7 +59,7 @@ def newtoneMethodStart(
         x0,  # точка в пространстве начальная
         x1,  # ещё одна точка в пространстве, отличная от начальной больше, чем на минимум
         delta=1,  # начальная дельта
-        iteration_stop_limit=0.001,
+        iteration_stop_limit=0.000001,  # accuracy
         max_iter: int = 100_000,
         learning_rate=1,
         trust_upper_bound=3 / 4,
@@ -70,7 +70,7 @@ def newtoneMethodStart(
     assert iteration_stop_limit > 0
     assert delta > 0
 
-    mop = Wolfe(12, 0.001, 0.1, 0.0001)
+    mop = Wolfe(12, 0.001, 0.1, iteration_stop_limit)
     gd = GradientDescent(function, gradient_matrix_function, mop, None)
 
     cur_iter_number = 0
@@ -111,8 +111,8 @@ def newtoneMethodStart(
 
 
 if __name__ == '__main__':
-    x0 = np.array([0, 0])
-    x1 = np.array([0, 1])
+    x0 = np.array([19, 0])
+    x1 = np.array([-10, 43])
     print(newtoneMethodStart(
         function=lambda vector: vector[0] ** 2 + vector[1] ** 2,
         gradient_matrix_function=lambda vector: np.array([2 * vector[0], 2 * vector[1]]),
