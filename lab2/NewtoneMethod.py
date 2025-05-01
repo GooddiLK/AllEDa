@@ -42,13 +42,10 @@ def find_intersect(fromDot, path, sphereRadius):  # need to check
     return fromDot + t_clipped * path
 
 
-def dog_leg(function, xk, C_dot, gradient, delta, gradient_matrix_function):
-    mop = Wolfe(12, 0.001, 0.1, 0.0001)
-    gd = GradientDescent(function, gradient_matrix_function, mop, None)
-    gd.vector = -gradient
+def dog_leg(gd, xk, C_dot, delta):
     gd.history().append(xk.astype(np.longdouble))
 
-    B_dot = find_minimum(mop, gd) - xk
+    B_dot = find_minimum(gd.learningRateCalculator, gd) - xk
     A_dot = find_intersect(fromDot=B_dot, path=-B_dot + C_dot, sphereRadius=delta)
     return A_dot
 
@@ -71,14 +68,18 @@ def newtoneMethodStart(
     assert iteration_stop_limit > 0
     assert delta > 0
 
+    mop = Wolfe(12, 0.001, 0.1, 0.0001)
+    gd = GradientDescent(function, gradient_matrix_function, mop, None)
+
     cur_iter_number = 0
     prev_x = x0
     cur_x = x1
-    cur_result = function(cur_x)
+    cur_result = gd.func(cur_x)
+
 
     assert iteration_stop_limit < np.linalg.norm(cur_x - prev_x)
     while np.linalg.norm(cur_x - prev_x) > iteration_stop_limit and max_iter > cur_iter_number:
-        gradient = gradient_matrix_function(cur_x)
+        gradient = gd.grad(cur_x)
         hess = hess_matrix_function(cur_x)
         hess_reversed = hess.__invert__()  # переделать потом можно -- вместо этого решать систему линейных уравнений
         model = get_model(cur_result, gradient, hess)
@@ -87,8 +88,9 @@ def newtoneMethodStart(
         is_trusted = False
 
         while not is_trusted:
-            A_dot = dog_leg(function, cur_x, C_dot, gradient, delta, gradient_matrix_function)
-            p_k = (cur_result - function(A_dot + cur_x)) / (
+            gd.vector = -gradient
+            A_dot = dog_leg(gd, cur_x, C_dot, delta)
+            p_k = (cur_result - gd.func(A_dot + cur_x)) / (
                     cur_result - model(A_dot))
             if p_k > trust_upper_bound:
                 delta *= trust_changing_multiply_value
@@ -107,12 +109,13 @@ def newtoneMethodStart(
     return [cur_x, cur_result]
 
 
-x0 = np.array([0, 0])
-x1 = np.array([0, 1])
-print(newtoneMethodStart(
-    function=lambda vector: vector[0] ^ 2 + vector[1] ^ 2,
-    gradient_matrix_function=lambda vector: np.array([2 * vector[0], 2 * vector[1]]),
-    hess_matrix_function=lambda vector: np.array([[2, 0], [0, 2]]),
-    x0=x0,
-    x1=x1,
-))
+if __name__ == '__main__':
+    x0 = np.array([0, 0])
+    x1 = np.array([0, 1])
+    print(newtoneMethodStart(
+        function=lambda vector: vector[0] ** 2 + vector[1] ** 2,
+        gradient_matrix_function=lambda vector: np.array([2 * vector[0], 2 * vector[1]]),
+        hess_matrix_function=lambda vector: np.array([[2, 0], [0, 2]]),
+        x0=x0,
+        x1=x1,
+    ))

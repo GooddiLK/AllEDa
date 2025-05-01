@@ -22,6 +22,9 @@ class GradientDescent:
         self.stoppingCriteria = stoppingCriteria
         self.__funcDict__ = dict()
         self.__gradDict__ = dict()
+        self.__history__ = []
+        self.__funcCalculation__ = 0
+        self.__gradCalculation__ = 0
 
     def next_point(self, point, learningRate):
         if learningRate < 0:
