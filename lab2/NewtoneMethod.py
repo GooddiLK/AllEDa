@@ -51,6 +51,8 @@ def dog_leg(gd, xk, C_dot, delta):
     A_dot = find_intersect(fromDot=B_dot, path=-B_dot + C_dot, sphereRadius=delta)
     return A_dot
 
+hessCalculation = 0
+hessDict = dict()
 
 def newtoneMethodStart(
         function,
@@ -58,6 +60,9 @@ def newtoneMethodStart(
         hess_matrix_function,  # function gives a hess in the dot i provide
         x0,  # точка в пространстве начальная
         x1,  # ещё одна точка в пространстве, отличная от начальной больше, чем на минимум
+        alpha_0,
+        c1,
+        c2,
         delta=1,  # начальная дельта
         iteration_stop_limit=0.000001,  # accuracy
         max_iter: int = 100_000,
@@ -70,8 +75,23 @@ def newtoneMethodStart(
     assert iteration_stop_limit > 0
     assert delta > 0
 
-    mop = Wolfe(12, 0.001, 0.1, iteration_stop_limit)
+    mop = Wolfe(alpha_0, c1, c2, iteration_stop_limit)
     gd = GradientDescent(function, gradient_matrix_function, mop, None)
+
+    global hessCalculation, hessDict
+    hessCalculation = 0
+    hessDict = dict()
+
+    def hessF(x_k):
+        global hessCalculation, hessDict
+        x_k = tuple(x_k)
+        if x_k in hessDict:
+            return hessDict[x_k]
+        hessCalculation += 1
+        h = hess_matrix_function(x_k)
+        h = np.array(h)
+        hessDict[x_k] = h
+        return h
 
     cur_iter_number = 0
     prev_x = x0
@@ -82,7 +102,7 @@ def newtoneMethodStart(
     while np.linalg.norm(cur_x - prev_x) > iteration_stop_limit and max_iter > cur_iter_number:
         cur_result = gd.func(cur_x)
         gradient = gd.grad(cur_x)
-        hess = hess_matrix_function(cur_x)
+        hess = hessF(cur_x)
         hess_reversed = hess.__invert__()  # переделать потом можно -- вместо этого решать систему линейных уравнений
         model = get_model(cur_result, gradient, hess)
         p = hess_reversed @ gradient
@@ -107,7 +127,7 @@ def newtoneMethodStart(
             prev_x = cur_x
             cur_x = A_dot + cur_x
         cur_iter_number += 1
-    return [cur_x, cur_result]
+    return [[cur_x] * 1, gd.__funcCalculation__ , gd.__gradCalculation__, hessCalculation]
 
 
 if __name__ == '__main__':
@@ -119,4 +139,7 @@ if __name__ == '__main__':
         hess_matrix_function=lambda vector: np.array([[2, 0], [0, 2]]),
         x0=x0,
         x1=x1,
+        alpha_0=12,
+        c1=0.001,
+        c2=0.01
     ))
