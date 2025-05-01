@@ -15,10 +15,7 @@ def find_minimum(mop, gd):
 def find_intersect(fromDot, path, sphereRadius):  # need to check
     a = np.dot(path, path)
     if a == 0:
-        if np.linalg.norm(fromDot) == sphereRadius:
-            return fromDot
-        else:
-            return fromDot
+        return fromDot
 
     b = 2 * np.dot(fromDot, path)
     c = np.dot(fromDot, fromDot) - sphereRadius ** 2
@@ -107,6 +104,7 @@ def newtoneMethodStart(
             prev_x = cur_x
             cur_x = A_dot
         cur_iter_number += 1
+    return [cur_x, cur_result]
 
 
 x0 = np.array([0, 0])
