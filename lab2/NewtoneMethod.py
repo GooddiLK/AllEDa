@@ -104,7 +104,14 @@ def newtoneMethodStart(
     cur_x = x1
     cur_result = gd.func(cur_x)
 
-    assert iteration_stop_limit < np.linalg.norm(cur_x - prev_x)
+    # assert iteration_stop_limit < np.linalg.norm(cur_x - prev_x)
+    while(iteration_stop_limit > np.linalg.norm(cur_x - prev_x)):
+        print(prev_x)
+        print("   ")
+        print(cur_x)
+        print("    ")
+        print(iteration_stop_limit)
+        prev_x += np.array([1,1]) * iteration_stop_limit
     while np.linalg.norm(cur_x - prev_x) > iteration_stop_limit and max_iter > cur_iter_number:
         cur_result = gd.func(cur_x)
         gradient = gd.grad(cur_x)

@@ -212,16 +212,20 @@ def extract_newton(func_number, alpha_0, iteration_stop_limit, c2, c1, delta, le
     return newton
 
 def trial_newton(trial, func_number):
-    alpha_0 = trial.suggest_float('alpha_0', 1e-2, 10, log=log)
+    alpha_0 = trial.suggest_float('alpha_0', 12, 12.1, log=log)
+    c1 = trial.suggest_float('c1', 0.001, 0.002, log=log)
+    c2 = trial.suggest_float('c2', 0.01, 0.02, log=log)
+
+    # alpha_0 = 12,
+    # c1 = 0.001,
+    # c2 = 0.01
     iteration_stop_limit = trial.suggest_float('iteration_stop_limit', 1e-10, 0.1, log=log)
-    c2 = trial.suggest_float('c2', 1e-2, 0.8, log=log)
-    c1 = trial.suggest_float('c1', 1e-7, c2 / 10, log=log)
     delta = trial.suggest_float('delta', 1e-2, 10, log=log)
-    learning_rate = trial.suggest_float('learning_rate', 1e-2, 5, log=log)
-    trust_upper_bound = trial.suggest_float('trust_upper_bound', 0.5, 0.9999, log=log)
-    trust_lower_bound = trial.suggest_float('trust_lower_bound', 1e-2, 0.5, log=log)
+    learning_rate = trial.suggest_float('learning_rate', 1e-1, 5, log=log)
+    trust_upper_bound = trial.suggest_float('trust_upper_bound', 0.5, 0.99, log=log)
+    trust_lower_bound = trial.suggest_float('trust_lower_bound', 1e-2, trust_upper_bound / 8 * 7, log=log)
     trust_no_trust_bound = trial.suggest_float('trust_no_trust_bound', 1e-3, trust_lower_bound / 2, log=log)
-    trust_changing_multiply_value = trial.suggest_float('trust_changing_multiply_value', 1, 10, log=log)
+    trust_changing_multiply_value = trial.suggest_float('trust_changing_multiply_value', 1.1, 10, log=log)
     return extract_newton(func_number, alpha_0, iteration_stop_limit, c2, c1, delta, learning_rate,
                           trust_upper_bound, trust_lower_bound, trust_no_trust_bound, trust_changing_multiply_value)
 
