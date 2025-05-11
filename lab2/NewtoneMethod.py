@@ -54,8 +54,10 @@ def dog_leg(gd, xk, C_dot, delta):
     A_dot = find_intersect(fromDot=B_dot, path=-B_dot + C_dot, sphereRadius=delta)
     return A_dot
 
+
 hessCalculation = 0
 hessDict = dict()
+
 
 def newtoneMethodStart(
         function,
@@ -105,18 +107,17 @@ def newtoneMethodStart(
     cur_result = gd.func(cur_x)
 
     # assert iteration_stop_limit < np.linalg.norm(cur_x - prev_x)
-    while(iteration_stop_limit > np.linalg.norm(cur_x - prev_x)):
-        print(prev_x)
-        print("   ")
-        print(cur_x)
-        print("    ")
-        print(iteration_stop_limit)
-        prev_x += np.array([1,1]) * iteration_stop_limit
+    while (iteration_stop_limit > np.linalg.norm(cur_x - prev_x)):
+        prev_x += np.array([1, 1]) * iteration_stop_limit
     while np.linalg.norm(cur_x - prev_x) > iteration_stop_limit and max_iter > cur_iter_number:
         cur_result = gd.func(cur_x)
         gradient = gd.grad(cur_x)
         hess = hessF(cur_x)
-        hess_reversed = np.linalg.inv(hess)  # переделать потом можно -- вместо этого решать систему линейных уравнений
+        # hess = hess.astype(np.float32)
+        # hess_reversed = np.linalg.solve(hess, np.array([[1], [1]], dtype=np.float32))
+        # hess_reversed = np.linalg.solve(hess, np.array([[1],[1]]))
+        hess_reversed = np.linalg.inv(hess.astype(
+            np.float64))  # TODO - переделать потом можно -- вместо этого решать систему линейных уравнений, поддержка np.longdouble
         model = get_model(cur_result, gradient, hess)
         C_dot = -hess_reversed @ gradient
         is_trusted = False
@@ -124,6 +125,9 @@ def newtoneMethodStart(
         while not is_trusted:
             gd.vector = -gradient
             A_dot = dog_leg(gd, cur_x, C_dot, delta)
+            poss_result = gd.func(A_dot + cur_x)
+            if (poss_result == cur_result):
+                return [[cur_x], gd.__funcCalculation__, gd.__gradCalculation__, hessCalculation]
             p_k = (cur_result - gd.func(A_dot + cur_x) + iteration_stop_limit / 16) / (
                     cur_result - model(A_dot) + iteration_stop_limit / 16)
             if p_k > trust_upper_bound:
@@ -143,7 +147,7 @@ def newtoneMethodStart(
                 if math.isnan(i):
                     raise GDException()
         cur_iter_number += 1
-    return [[cur_x], gd.__funcCalculation__ , gd.__gradCalculation__, hessCalculation]
+    return [[cur_x], gd.__funcCalculation__, gd.__gradCalculation__, hessCalculation]
 
 
 if __name__ == '__main__':
