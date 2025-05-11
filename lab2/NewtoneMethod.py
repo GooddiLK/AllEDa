@@ -124,7 +124,7 @@ def newtoneMethodStart(
 
         while not is_trusted:
             gd.vector = -gradient
-            A_dot = dog_leg(gd, cur_x, C_dot, deltaб model)
+            A_dot = dog_leg(gd, cur_x, C_dot, delta, model)
             poss_result = gd.func(A_dot + cur_x)
             if (poss_result == cur_result):
                 return [[cur_x], gd.__funcCalculation__, gd.__gradCalculation__, hessCalculation]
