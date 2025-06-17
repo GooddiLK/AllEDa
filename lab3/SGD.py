@@ -1,18 +1,13 @@
 import numpy as np
-import time
-from memory_profiler import memory_usage
 
 from lab1.StoppingCriteria import IterationsPlus
 
-
 class StochasticGradientDescent:
-    def __init__(self, func, grad, learning_rate_calculator, stopping_criteria, regularization=None, reg_param=0.01):
+    def __init__(self, learning_rate_calculator, stopping_criteria, regularization=None, reg_param=0.01):
         self.learningRateCalculator = learning_rate_calculator
         self.stoppingCriteria = stopping_criteria
         self.regularization = regularization
         self.reg_param = reg_param
-        self.__funcDict__ = dict()
-        self.__gradDict__ = dict()
 
     def _apply_regularization(self, weights):
         if self.regularization == 'l1':
@@ -37,8 +32,6 @@ class StochasticGradientDescent:
         return self.__history__
 
     def __call__(self, start_weight, X, y, batch_size, iterations):
-        start_time = time.time()
-        mem_before = memory_usage(-1, interval=0.1, timeout=1)[0]
         operation_count = 0
 
         prev_stopping_criteria = self.stoppingCriteria
@@ -60,27 +53,28 @@ class StochasticGradientDescent:
                 X_batch = X[i:i + batch_size]
                 y_batch = y[i:i + batch_size]
 
-                # Предсказание и ошибка (2 * batch_size * n_features операций)
+                # Предсказание: матричное умножение (batch_size * n_features)
                 predictions = np.dot(X_batch, weight)
+
+                # Ошибка: вычитание (batch_size)
                 errors = predictions - y_batch
-                operation_count += 2 * batch_size * n_features
 
-                # Градиент (batch_size * n_features операций)
+                # Градиент: матричное умножение (batch_size * n_features)
                 gradient = (2 / len(y_batch)) * np.dot(X_batch.T, errors)
-                operation_count += batch_size * n_features
 
+                # Регуляризация (n_features)
                 gradient += self._apply_regularization(weight)
 
+                # Обновление весов (n_features)
                 learningRate = self.learningRateCalculator.learning_rate(self)
                 weight = self.next_point(weight, gradient, learningRate)
+
+                operation_count += (batch_size * (2 * n_features + 1)
+                                    + 2 * n_features)
 
             self.__history__.append(weight)
             if self.stoppingCriteria(self, weight):
                 break
-
-        total_time = time.time() - start_time
-        mem_after = memory_usage(-1, interval=0.1, timeout=1)[0]
-        mem_used = mem_after - mem_before  # MB
 
         # Вычисление MSE на всех данных
         y_pred = np.dot(X, weight)
@@ -92,7 +86,5 @@ class StochasticGradientDescent:
             "history": self.__history__,
             "final_weights": weight,
             "mse": mse,
-            "time_sec": total_time,
-            "memory_mb": mem_used,
             "total_operations": operation_count,
         }
