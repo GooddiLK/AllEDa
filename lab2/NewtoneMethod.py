@@ -44,11 +44,12 @@ def find_intersect(fromDot, path, sphereRadius):  # need to check
     return fromDot + t_clipped * path
 
 
-def dog_leg(gd, xk, C_dot, delta, model, model_gradient_matrix_function):
-    gd.history().append(xk.astype(np.longdouble))
+def dog_leg(gd, xk, C_dot, delta, model, model_gradient_matrix_function, mop):
+    # gd.history().append(xk.astype(np.longdouble))
+    gd = GradientDescent(model, model_gradient_matrix_function, mop, None)
     if delta >= np.linalg.norm(C_dot):
         return C_dot
-    # gd.__gradFunc__ = GradientDescent(grad=model_gradient_matrix_function, func=model, ) // TODO надо искать по градиенту model_gradient_matrix_function и функции model
+    # TODO надо искать по градиенту model_gradient_matrix_function и функции model
     B_dot = find_minimum(gd.learningRateCalculator, gd)
     if delta <= np.linalg.norm(B_dot):
         return B_dot / (np.linalg.norm(B_dot) / delta)
