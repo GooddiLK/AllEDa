@@ -3,7 +3,7 @@ import numpy as np
 from lab1.StoppingCriteria import IterationsPlus
 
 class StochasticGradientDescent:
-    def __init__(self, learning_rate_calculator, stopping_criteria, regularization=None, reg_param=0.01):
+    def __init__(self, learning_rate_calculator, stopping_criteria, regularization=None, reg_param=0.0001):
         self.learningRateCalculator = learning_rate_calculator
         self.stoppingCriteria = stopping_criteria
         self.regularization = regularization
@@ -41,9 +41,10 @@ class StochasticGradientDescent:
         weight = start_weight
         self.__history__ = [start_weight]
         n_samples = len(X)
-        n_features = X.shape[1]
+        n_features = X.shape[1] # количество признаков
 
         while True:
+            # перемешиваем данные
             indices = np.arange(n_samples)
             np.random.shuffle(indices)
             X = X[indices]
