@@ -14,7 +14,9 @@ class GradientDescentWithSciPy:
         x, y = sp.symbols('x y')
         func_numeric = sp.lambdify((x, y), self.__funcFunc__, modules="numpy")
         grad_func_numeric = compute_gradient(self.__funcFunc__, (x, y))
-        hess_func_numeric = compute_hessian(self.__funcFunc__, (x, y))
+        hess_func_numeric = None
+        if self.method == "Newton-CG":
+            hess_func_numeric = compute_hessian(self.__funcFunc__, (x, y))
 
         def hess_f(x_arr):
             return np.array(hess_func_numeric(x_arr[0], x_arr[1]))
@@ -40,4 +42,7 @@ class GradientDescentWithSciPy:
             callback=callback,
         )
 
-        return history, result.nfev, result.njev, result.nhev
+        if self.method == "Newton-CG":
+            return history, result.nfev, result.njev, result.nhev
+        else:
+            return history, result.nfev, result.njev, 0
