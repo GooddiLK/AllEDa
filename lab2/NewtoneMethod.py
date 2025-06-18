@@ -44,10 +44,11 @@ def find_intersect(fromDot, path, sphereRadius):  # need to check
     return fromDot + t_clipped * path
 
 
-def dog_leg(gd, xk, C_dot, delta, model):
+def dog_leg(gd, xk, C_dot, delta, model, model_gradient_matrix_function):
     gd.history().append(xk.astype(np.longdouble))
     if delta >= np.linalg.norm(C_dot):
         return C_dot
+    # gd.__gradFunc__ = GradientDescent(grad=model_gradient_matrix_function, func=model, ) // TODO надо искать по градиенту model_gradient_matrix_function и функции model
     B_dot = find_minimum(gd.learningRateCalculator, gd)
     if delta <= np.linalg.norm(B_dot):
         return B_dot / (np.linalg.norm(B_dot) / delta)
@@ -121,10 +122,11 @@ def newtoneMethodStart(
         model = get_model(cur_result, gradient, hess)
         C_dot = -hess_reversed @ gradient
         is_trusted = False
+        model_gradient_matrix_function = lambda p: gradient + hess @ p
 
         while not is_trusted:
             gd.vector = -gradient
-            A_dot = dog_leg(gd, cur_x, C_dot, delta, model)
+            A_dot = dog_leg(gd, cur_x, C_dot, delta, model, model_gradient_matrix_function)
             poss_result = gd.func(A_dot + cur_x)
             if (poss_result == cur_result):
                 return [[cur_x], gd.__funcCalculation__, gd.__gradCalculation__, hessCalculation]
