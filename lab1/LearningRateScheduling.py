@@ -25,20 +25,21 @@ class LearningRateSchedulingGeom:
         return self.learning_rate_0 / (self.k ** (gd.epoch() - 1))
 
 
-# Вспомогательная функция для функционального планирования шага
-def h0(epoch):
-    return 1 / sqrt(epoch + 1)
-
-
 # Планирование шага - экспоненциальное затухание
 # Экспонента должна быть маленькой, порядка десятых
 class LearningRateSchedulingExponential:
-    def __init__(self, lambdaParameter):
+    def __init__(self, h0, lambdaParameter):
+        self.h0 = h0
         self.lambdaParameter = lambdaParameter
 
     def learning_rate(self, gd):
         epoch = gd.epoch()
-        return h0(epoch) * exp(-self.lambdaParameter * epoch)
+        return self.h0 * exp(-self.lambdaParameter * epoch)
+
+
+# Вспомогательная функция для функционального планирования шага
+def h0(epoch):
+    return 1 / sqrt(epoch + 1)
 
 
 # Планирование шага - полиномиальное затухание

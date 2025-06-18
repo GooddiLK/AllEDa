@@ -1,8 +1,13 @@
 # В этом файле содержится непосредственно алгоритм градиентного спуска
+import math
 
 import numpy as np
 
 from lab1.StoppingCriteria import IterationsPlus
+
+class GDException(Exception):
+    def __init__(self):
+        super().__init__("Point has NaN coordinates")
 
 
 class GradientDescent:
@@ -16,10 +21,16 @@ class GradientDescent:
         self.stoppingCriteria = stoppingCriteria
         self.__funcDict__ = dict()
         self.__gradDict__ = dict()
+        self.__history__ = []
+        self.__funcCalculation__ = 0
+        self.__gradCalculation__ = 0
 
     def next_point(self, point, learningRate):
         if learningRate < 0:
             raise Exception("Learning rate must be positive")
+        for i in point:
+            if math.isnan(i):
+                raise GDException()
         return np.add(point, np.multiply(self.vector, learningRate))
 
     # Возвращает номер итерации алгоритма
@@ -33,6 +44,7 @@ class GradientDescent:
             return self.__funcDict__[x_k]
         self.__funcCalculation__ += 1
         f = self.__funcFunc__(x_k)
+        f = np.array(f).astype(np.longdouble)
         self.__funcDict__[x_k] = f
         return f
 
@@ -43,6 +55,7 @@ class GradientDescent:
             return self.__gradDict__[x_k]
         self.__gradCalculation__ += 1
         g = self.__gradFunc__(x_k)
+        g = np.array(g).astype(np.longdouble)
         self.__gradDict__[x_k] = g
         return g
 
@@ -60,12 +73,12 @@ class GradientDescent:
         prev_stopping_criteria = self.stoppingCriteria
         if iterations > 0:
             self.stoppingCriteria = IterationsPlus(iterations, prev_stopping_criteria)
-        point = startPoint
+        point = np.array(startPoint).astype(np.longdouble)
         self.__history__ = [startPoint] # История посещенных точек
         self.__funcCalculation__ = 0    # Счетчик вычислений функции
         self.__gradCalculation__ = 0    # Счётчик вычислений градиента
         while True:
-            self.vector = np.multiply(self.grad(point), -1)  # Направление следующего движения
+            self.vector = np.multiply(self.grad(point), -1).astype(np.longdouble)  # Направление следующего движения
             point = self.next_point(point, self.learningRateCalculator.learning_rate(self))
             b = self.stoppingCriteria(self, point)
             self.__history__.append(point)
