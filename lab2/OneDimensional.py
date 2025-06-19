@@ -1,5 +1,5 @@
 import numpy as np
-from lab2.Utils2 import *
+from lab2.Utils import *
 
 
 # Вычисление одной из частей условия Армихо

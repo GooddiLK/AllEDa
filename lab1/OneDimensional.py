@@ -6,7 +6,7 @@
 import numpy as np
 # from utils import *
 
-from lab2.Utils2 import compute_gradient
+from lab2.Utils import compute_gradient
 import sympy as sp
 
 

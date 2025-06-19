@@ -1,7 +1,7 @@
 # В этом файле содержится непосредственно алгоритм градиентного спуска
 
 import numpy as np
-from lab2.Utils2 import *
+from lab2.Utils import *
 from scipy.optimize import minimize
 import sympy as sp
 

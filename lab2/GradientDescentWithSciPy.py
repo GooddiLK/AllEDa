@@ -1,4 +1,4 @@
-from lab2.Utils2 import *
+from lab2.Utils import *
 from scipy.optimize import minimize
 import numpy as np
 
