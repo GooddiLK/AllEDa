@@ -18,7 +18,7 @@ if __name__ == "__main__":
     points = [(), (100, -200), (100, -200), (100, -200), (100, -200)]
     stop = SequenceEps(10 ** -6)
     from Optuna import max_iterations
-    for i in range(1, 5):
+    for i in range(3, 5):
         def run_too_many_word(learn, objective):
             study = run_study(objective, i, reals[i])
             print_study(study)

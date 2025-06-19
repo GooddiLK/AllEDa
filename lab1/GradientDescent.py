@@ -30,7 +30,7 @@ class GradientDescent:
         if learningRate < 0:
             raise Exception("Learning rate must be positive")
         for i in point:
-            if math.isnan(i):
+            if np.isnan(i):
                 raise GDException()
         return np.add(point, np.multiply(self.vector, learningRate))
 

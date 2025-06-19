@@ -1,6 +1,6 @@
 import numpy as np
 
-from lab1.GradientDescent import GradientDescent
+from lab1.GradientDescent import GradientDescent, GDException
 
 func_table = [
     [lambda x: x[0] ** 2 - 10,
@@ -64,5 +64,8 @@ def print_r(r, name=None):
 
 
 def print_res(gd_inst, point, iterations, name=None):
-    r = run(gd_inst, point, iterations)
-    print_r(r, name)
+    try:
+        r = run(gd_inst, point, iterations)
+        print_r(r, name)
+    except GDException as _:
+        print("NaN")
