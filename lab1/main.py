@@ -1,4 +1,5 @@
 from GradientDescent import *
+from LearningRateScheduling import *
 from OneDimensional import *
 from StoppingCriteria import *
 
@@ -6,7 +7,6 @@ import numpy as np
 
 from Examples import func_table
 from Pyplot import show
-
 
 if __name__ == "__main__":
     f_num = 1

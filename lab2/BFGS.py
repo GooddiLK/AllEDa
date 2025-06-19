@@ -1,4 +1,4 @@
-from lab2.Utils import *
+from lab2.Utils2 import *
 from lab1.OneDimensional import *
 import numpy as np
 
@@ -29,5 +29,6 @@ class BFGS:
         a2 = i - rho * delta_grad[:, np.newaxis] * s[np.newaxis, :]
 
         self.hess = np.dot(a1, np.dot(self.hess, a2)) + (rho * s[:, np.newaxis] * s[np.newaxis, :])
+        # TODO: Версия newtoneMethodAdding: self.hess = np.dot(a1, np.dot(self.hess, a2)) + (self.hess * s[:, np.newaxis] * s[np.newaxis, :])
 
         return a

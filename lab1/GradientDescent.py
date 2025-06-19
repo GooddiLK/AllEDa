@@ -5,6 +5,7 @@ import numpy as np
 
 from lab1.StoppingCriteria import IterationsPlus
 
+
 class GDException(Exception):
     def __init__(self):
         super().__init__("Point has NaN coordinates")

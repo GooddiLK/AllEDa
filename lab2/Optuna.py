@@ -1,4 +1,6 @@
+import numpy as np
 import optuna as opt
+import math
 from random import randint
 
 from lab1.Examples import *
