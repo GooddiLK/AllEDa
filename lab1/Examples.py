@@ -31,6 +31,14 @@ func_table = [
                 [0, 2 + 40 * np.pi ** 2 * np.cos(2 * np.pi * x[1])]]],
 ]
 
+reals = [
+        [(0,)],
+        [(0, 0)],
+        [(0, 0)],
+        [(3, 2), (-2.805118, 3.131312), (-3.779310, -3.283186), (3.584428, -1.848126)],
+        [(0, 0)]
+    ]
+
 
 def grad_des_instance(func_number, learning_rate, stopping_criteria):
     gd = GradientDescent(func_table[func_number][0], func_table[func_number][1], learning_rate, stopping_criteria)

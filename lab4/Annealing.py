@@ -9,11 +9,8 @@ class Annealing:
         df = v_new - v
         if v_new < v:
             return x_new
-        print(f"cur:{cur} == {v}\nnew{x_new} == {v_new}")
         if random.random() < math.exp(-df/t):
-            print("прок")
             return x_new
-        print("не прок")
         return cur
 
     def func(self, x):
@@ -34,5 +31,5 @@ class Annealing:
             x_new = [xi + (random.random() - 0.5) * t for xi in cur]
             cur = self.calc_new(cur, t, x_new)
             t = alpha * t
-        return cur
+        return cur, self.func_calcs
 

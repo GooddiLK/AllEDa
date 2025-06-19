@@ -1,7 +1,7 @@
-import numpy as np
 import optuna as opt
 import math
 from random import randint
+import numpy as np
 
 from lab1.Examples import *
 from lab1.GradientDescent import GDException
@@ -20,16 +20,24 @@ big_constant = 10 ** 18
 log = True
 show_progress = True
 
+def min_norm(x, reals):
+    for i in range(len(reals)):
+        reals[i] = np.array(reals[i])
+    norm = np.linalg.norm(x - reals[0])
+    for p_min in reals:
+        norm = min(norm, np.linalg.norm(x - p_min))
+    return norm
+
 # Функция по которой optuna оптимизирует параметры
-def optimizing_func(func_calc, grad_calc, found, real):
-    return func_calc + grad_calc + big_constant * np.linalg.norm(real - found)
+def optimizing_func(func_calc, grad_calc, found, reals):
+    return func_calc + grad_calc + big_constant * min_norm(found, reals)
 
 # Запуск оптимизации optuna
-def run_study(pre_objective, func_number, real, n_trials=50):
+def run_study(pre_objective, func_number, reals, n_trials=50):
     logging.getLogger("optuna").setLevel(logging.WARNING)
     study = opt.create_study(direction="minimize")
     def objective(trial):
-        return pre_objective(trial, func_number, real)
+        return pre_objective(trial, func_number, reals)
     study.optimize(objective, n_trials=n_trials, show_progress_bar=show_progress)
     return study
 
@@ -48,11 +56,10 @@ def print_study(study):
 
 
 # Runs objective with provided gradient descent and point it should find
-def run_objective(gd, real, point_from=None, delta=50, number_of=40):
+def run_objective(gd, reals, point_from=None, delta=50, number_of=40):
     if point_from is None:
-        point_from = real
-    dims = len(real)
-    real = np.array(real).astype(np.longdouble)
+        point_from = reals[0]
+    dims = len(point_from)
     point_from = np.array(point_from).astype(np.longdouble)
     result = 0
     for i in range(number_of):
@@ -65,7 +72,7 @@ def run_objective(gd, real, point_from=None, delta=50, number_of=40):
         except GDException as _:
             result += big_constant ** 2
             continue
-        one_result = optimizing_func(func_calc, grad_calc, h[-1], real)
+        one_result = optimizing_func(func_calc, grad_calc, h[-1], reals)
         result += one_result
     return result
 
@@ -83,10 +90,10 @@ def trial_learning_rate_scheduling_constant(trial):
 
 
 # Optimizing constant learning rate
-def objective_learning_rate_scheduling_constant(trial, func_number, real):
+def objective_learning_rate_scheduling_constant(trial, func_number, reals):
     learning_rate = trial_learning_rate_scheduling_constant(trial)
     gd = grad_des_instance(func_number, learning_rate, stopping_criteria)
-    return run_objective(gd, real)
+    return run_objective(gd, reals)
 
 
 def learn_learning_rate_scheduling_constant(study, func_number, stop):
@@ -101,10 +108,10 @@ def trial_learning_rate_scheduling_exponential(trial):
 
 
 # Optimizing exponential learning rate
-def objective_learning_rate_scheduling_exponential(trial, func_number, real):
+def objective_learning_rate_scheduling_exponential(trial, func_number, reals):
     learning_rate = trial_learning_rate_scheduling_exponential(trial)
     gd = grad_des_instance(func_number, learning_rate, stopping_criteria)
-    return run_objective(gd, real)
+    return run_objective(gd, reals)
 
 
 def learn_learning_rate_scheduling_exponential(study, func_number, stop):
@@ -120,10 +127,10 @@ def trial_armijo(trial):
     return Armijo(alpha_0, q, epsilon, c1)
 
 # Optimizing GD with Armijo
-def objective_armijo(trial, func_number, real):
+def objective_armijo(trial, func_number, reals):
     armijo = trial_armijo(trial)
     gd = grad_des_instance(func_number, armijo, stopping_criteria)
-    return run_objective(gd, real)
+    return run_objective(gd, reals)
 
 
 def learn_armijo(study, func_number, stop):
@@ -140,10 +147,10 @@ def trial_wolfe(trial):
 
 
 # Optimizing GD with Wolfe
-def objective_wolfe(trial, func_number, real):
+def objective_wolfe(trial, func_number, reals):
     wolfe = trial_wolfe(trial)
     gd = grad_des_instance(func_number, wolfe, stopping_criteria)
-    return run_objective(gd, real)
+    return run_objective(gd, reals)
 
 
 def learn_wolfe(study, func_number, stop):
@@ -159,22 +166,21 @@ def trial_bfgs(trial, func_number):
     return BFGS(sympy_func[func_number], alpha_0, q, epsilon, c1)
 
 # Optimizing BFGS
-def objective_bfgs(trial, func_number, real):
+def objective_bfgs(trial, func_number, reals):
     bfgs = trial_bfgs(trial, func_number)
     gd = grad_des_instance(func_number, bfgs, stopping_criteria)
-    return run_objective(gd, real)
+    return run_objective(gd, reals)
 
 
 def learn_bfgs(study, func_number, stop):
     bfgs = BFGS(sympy_func[func_number], study.best_params["alpha_0"], study.best_params["q"], study.best_params["epsilon"], study.best_params["c1"])
     return grad_des_instance(func_number, bfgs, stop)
 
-def optimizing_func_newton(func_calc, grad_calc, hess_calc, found, real):
-    return big_constant * np.linalg.norm(real - found) + func_calc + grad_calc + hess_calc
+def optimizing_func_newton(func_calc, grad_calc, hess_calc, found, reals):
+    return big_constant * min_norm(found, reals) + func_calc + grad_calc + hess_calc
 
-def run_objective_newton(newton, real, point_from0, point_from1, delta=50, number_of=40):
-    dims = len(real)
-    real = np.array(real).astype(np.longdouble)
+def run_objective_newton(newton, reals, point_from0, point_from1, delta=50, number_of=40):
+    dims = len(reals[0])
     point_from0 = np.array(point_from0).astype(np.longdouble)
     point_from1 = np.array(point_from1).astype(np.longdouble)
     result = 0
@@ -188,7 +194,7 @@ def run_objective_newton(newton, real, point_from0, point_from1, delta=50, numbe
         except GDException as _:
             result += big_constant ** 2
             continue
-        one_result = optimizing_func_newton(func_calc, grad_calc, hess_calc, h[-1], real)
+        one_result = optimizing_func_newton(func_calc, grad_calc, hess_calc, h[-1], reals)
         result += one_result
     return result
 
@@ -242,9 +248,9 @@ def trial_newton(trial, func_number):
                           trust_upper_bound, trust_lower_bound, trust_no_trust_bound, trust_changing_multiply_value)
 
 # Optimizing Newton
-def objective_newton(trial, func_number, real, point_from0, point_from1, delta):
+def objective_newton(trial, func_number, reals, point_from0, point_from1, delta):
     newton = trial_newton(trial, func_number)
-    return run_objective_newton(newton, real, point_from0, point_from1, delta, 2)
+    return run_objective_newton(newton, reals, point_from0, point_from1, delta, 2)
 
 def learn_newton(study, func_number, _):
     return extract_newton(

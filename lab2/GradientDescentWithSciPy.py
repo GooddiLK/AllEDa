@@ -44,9 +44,6 @@ class GradientDescentWithSciPy:
             callback=callback,
         )
 
-        return history, result.nfev, result.njev, result.nhev
-        # TODO: Версия newtoneMethodAdding:
-        # if self.method == "Newton-CG":
-        #     return history, result.nfev, result.njev, result.nhev
-        # else:
-        #     return history, result.nfev, result.njev, 0
+        if self.method == "Newton-CG":
+            return history, result.nfev, result.njev, result.nhev
+        return history, result.nfev, result.njev, 0
