@@ -1,11 +1,10 @@
-from GradientDescent import *
-from LearningRateScheduling import *
-from OneDimensional import *
-from StoppingCriteria import *
+from lab1.GradientDescent import *
+from lab1.OneDimensional import *
+from lab1.StoppingCriteria import *
 
 import numpy as np
 
-from Examples import func_table
+from lab1.Examples import func_table
 from Pyplot import show
 
 if __name__ == "__main__":

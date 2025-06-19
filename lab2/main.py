@@ -13,14 +13,18 @@ sympy_func = [
 
 if __name__ == "__main__":
     reals = [(0, 0),(0, 0),(0, 0),(3, 2), (0, 0)] # real mins
-    points = [(2, 2),(2, 2),(2, 2),(2, 2), (2, 2)] # points to call on
+    points = [(2, 2),(2, 2),(2, 2),(-2, -2), (2, 2)] # points to call on
     stop = SequenceEps(10 ** -6)
     from Optuna import max_iterations
-    for i in range(1, 5):
+    for i in range(3, 4):
         def run_too_many_word(learn, objective):
             study = run_study(objective, i, reals[i])
             print_study(study)
             return learn(study, i, stop)
+        def run_too_many_word_newton(point_from0, point_from1, delta):
+            study = run_study_newton(objective_newton, i, reals[i], point_from0, point_from1, delta)
+            print_study(study)
+            return learn_newton(study, i, stop)
         print(i)
         print("------------------------------------------------------------------------")
         # gd = run_too_many_word(learn_learning_rate_scheduling_constant, objective_learning_rate_scheduling_constant)
@@ -37,8 +41,8 @@ if __name__ == "__main__":
         # print_res(gd_scipy, points[i], max_iterations, "scipy BFGS")
         # gd_scipy = GradientDescentWithSciPy(func=sympy_func[i], method="Newton-CG")
         # print_res(gd_scipy, points[i], max_iterations, "scipy Newton-CG")
-        # nt = run_too_many_word(learn_newton, objective_newton)
-        # print_r(nt(points[i], [4, 4]),"Newton")
+        nt = run_too_many_word_newton([5, 4], [4, 4], 0.1) # delta не должна превышать расстояние между точками
+        print_r(nt([5, 4], [4, 4]),"Newton")
         print("------------------------------------------------------------------------\n\n\n")
 
     # rng = 5

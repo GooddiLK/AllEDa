@@ -33,6 +33,14 @@ def run_study(pre_objective, func_number, real, n_trials=50):
     study.optimize(objective, n_trials=n_trials, show_progress_bar=show_progress)
     return study
 
+def run_study_newton(pre_objective, func_number, real, point_from0, point_from1, delta, n_trials=50):
+    logging.getLogger("optuna").setLevel(logging.WARNING)
+    study = opt.create_study(direction="minimize")
+    def objective(trial):
+        return pre_objective(trial, func_number, real, point_from0, point_from1, delta)
+    study.optimize(objective, n_trials=n_trials, show_progress_bar=show_progress)
+    return study
+
 
 def print_study(study):
     print("Лучшие параметры:", study.best_params)
@@ -162,26 +170,21 @@ def learn_bfgs(study, func_number, stop):
     return grad_des_instance(func_number, bfgs, stop)
 
 def optimizing_func_newton(func_calc, grad_calc, hess_calc, found, real):
-    return func_calc + grad_calc + hess_calc + big_constant * np.linalg.norm(real - found)
+    return big_constant * np.linalg.norm(real - found) + func_calc + grad_calc + hess_calc
 
-def run_objective_newton(newton, real, point_from=None, delta=50, number_of=40):
-    if point_from is None:
-        point_from = real
+def run_objective_newton(newton, real, point_from0, point_from1, delta=50, number_of=40):
     dims = len(real)
     real = np.array(real).astype(np.longdouble)
-    point_from = np.array(point_from).astype(np.longdouble)
+    point_from0 = np.array(point_from0).astype(np.longdouble)
+    point_from1 = np.array(point_from1).astype(np.longdouble)
     result = 0
     for i in range(number_of):
         point1 = [0] * dims
         for j in range(dims):
-            point1[j] = randint(int(point_from[j] - delta), int(point_from[j] + delta))
+            point1[j] = randint(int(point_from1[j] - delta), int(point_from1[j] + delta))
         point1 = np.array(point1).astype(np.longdouble)
-        point2 = [0] * dims
-        for j in range(dims):
-            point2[j] = randint(int(point_from[j] - delta), int(point_from[j] + delta))
-        point2 = np.array(point2).astype(np.longdouble)
         try:
-            h, func_calc, grad_calc, hess_calc = newton(point1, point2)
+            h, func_calc, grad_calc, hess_calc = newton(point_from0,  point1)
         except GDException as _:
             result += big_constant ** 2
             continue
@@ -224,13 +227,24 @@ def trial_newton(trial, func_number):
     trust_lower_bound = trial.suggest_float('trust_lower_bound', 1e-2, 0.5, log=log)
     trust_no_trust_bound = trial.suggest_float('trust_no_trust_bound', 1e-3, trust_lower_bound / 2, log=log)
     trust_changing_multiply_value = trial.suggest_float('trust_changing_multiply_value', 1, 10, log=log)
+    # alpha_0 = 10
+    # iteration_stop_limit = 0.000001
+    # c2 = 0.7
+    # c1 = 0.2
+    # delta = 1
+    # learning_rate = 0.1
+    # trust_upper_bound = 0.75
+    # trust_lower_bound = 1/4
+    # trust_no_trust_bound = 1/16
+    # trust_changing_multiply_value = 2
+
     return extract_newton(func_number, alpha_0, iteration_stop_limit, c2, c1, delta, learning_rate,
                           trust_upper_bound, trust_lower_bound, trust_no_trust_bound, trust_changing_multiply_value)
 
 # Optimizing Newton
-def objective_newton(trial, func_number, real):
+def objective_newton(trial, func_number, real, point_from0, point_from1, delta):
     newton = trial_newton(trial, func_number)
-    return run_objective_newton(newton, real)
+    return run_objective_newton(newton, real, point_from0, point_from1, delta, 2)
 
 def learn_newton(study, func_number, _):
     return extract_newton(

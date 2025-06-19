@@ -44,7 +44,7 @@ class GradientDescent:
         if x_k in self.__funcDict__:
             return self.__funcDict__[x_k]
         self.__funcCalculation__ += 1
-        f = self.__funcFunc__(x_k)
+        f = self.__funcFunc__(np.array(x_k).astype(np.longdouble))
         f = np.array(f).astype(np.longdouble)
         self.__funcDict__[x_k] = f
         return f
