@@ -4,10 +4,6 @@
 
 
 import numpy as np
-# from utils import *
-
-from lab2.Utils import compute_gradient
-import sympy as sp
 
 
 # Вычисление одной из частей условия Армихо

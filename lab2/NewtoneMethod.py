@@ -50,7 +50,6 @@ def dog_leg(pre_gd, xk, C_dot, delta, model, model_gradient_matrix_function, mop
     gd.history().append(xk.astype(np.longdouble))
     if delta >= np.linalg.norm(C_dot):
         return C_dot
-    # TODO надо искать по градиенту model_gradient_matrix_function и функции model
     B_dot = find_minimum(gd.learningRateCalculator, gd)
     if delta <= np.linalg.norm(B_dot):
         return B_dot / (np.linalg.norm(B_dot) / delta)
@@ -111,17 +110,15 @@ def newtoneMethodStart(
     cur_result = gd.func(cur_x)
 
     # assert iteration_stop_limit < np.linalg.norm(cur_x - prev_x)
-    while (iteration_stop_limit > np.linalg.norm(cur_x - prev_x)):
-        prev_x += np.array([1, 1]) * iteration_stop_limit # TODO: Remove?
+    while iteration_stop_limit > np.linalg.norm(cur_x - prev_x):
+        prev_x += np.array([1, 1]) * iteration_stop_limit
+
     while np.linalg.norm(cur_x - prev_x) > iteration_stop_limit and max_iter > cur_iter_number:
         cur_result = gd.func(cur_x)
         gradient = gd.grad(cur_x)
         hess = hessF(cur_x)
-        # hess = hess.astype(np.float32)
-        # hess_reversed = np.linalg.solve(hess, np.array([[1], [1]], dtype=np.float32))
-        # hess_reversed = np.linalg.solve(hess, np.array([[1],[1]]))
-        hess_reversed = np.linalg.inv(hess.astype(
-            np.float64))  # TODO - переделать потом можно -- вместо этого решать систему линейных уравнений, поддержка np.longdouble
+        hess_reversed = np.linalg.inv(hess.astype(np.float64))
+        # Вместо этого решать систему линейных уравнений + поддержка np.longdouble
         model = get_model(cur_result, gradient, hess)
         C_dot = -hess_reversed @ gradient
         is_trusted = False
@@ -130,7 +127,7 @@ def newtoneMethodStart(
         while not is_trusted:
             gd.vector = -gradient
             A_dot = dog_leg(gd, cur_x, C_dot, delta, model, model_gradient_matrix_function, mop)
-            poss_result = gd.func(A_dot + cur_x) # TODO: Хочется комментариев по поводу этих строк
+            poss_result = gd.func(A_dot + cur_x)
             if (poss_result == cur_result):
                 return [[cur_x], gd.__funcCalculation__, gd.__gradCalculation__, hessCalculation]
             p_k = (cur_result - gd.func(A_dot + cur_x) + iteration_stop_limit / 16) / (

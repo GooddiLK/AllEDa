@@ -18,7 +18,7 @@ if __name__ == "__main__":
     points = [(), (100, -200), (100, -200), (100, -200), (100, -200)]
     stop = SequenceEps(10 ** -6)
     from Optuna import max_iterations
-    for i in range(3, 5):
+    for i in range(1, 5):
         def run_too_many_word(learn, objective):
             study = run_study(objective, i, reals[i])
             print_study(study)
@@ -43,8 +43,8 @@ if __name__ == "__main__":
         print_res(gd_scipy, points[i], max_iterations, "scipy BFGS")
         gd_scipy = GradientDescentWithSciPy(func=sympy_func[i], method="Newton-CG")
         print_res(gd_scipy, points[i], max_iterations, "scipy Newton-CG")
-        nt = run_too_many_word_newton([5, 4], [4, 4], 0.1) # delta не должна превышать расстояние между точками
-        print_r(nt([5, 4], [4, 4]),"Newton")
+        nt = run_too_many_word_newton([10, 10], [10, 9], 0.1) # delta не должна превышать расстояние между точками
+        print_r(nt([10, 9], [10, 8]),"Newton")
         print("------------------------------------------------------------------------\n\n\n")
 
     # rng = 5
