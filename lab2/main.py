@@ -43,8 +43,8 @@ if __name__ == "__main__":
         print_res(gd_scipy, points[i], max_iterations, "scipy BFGS")
         gd_scipy = GradientDescentWithSciPy(func=sympy_func[i], method="Newton-CG")
         print_res(gd_scipy, points[i], max_iterations, "scipy Newton-CG")
-        nt = run_too_many_word_newton([10, 10], [10, 9], 0.1) # delta не должна превышать расстояние между точками
-        print_r(nt([10, 9], [10, 8]),"Newton")
+        nt = run_too_many_word_newton([50, 50], [50, 49], 0.1) # delta не должна превышать расстояние между точками
+        print_r(nt([100, 100], [100, 99]),"Newton")
         print("------------------------------------------------------------------------\n\n\n")
 
     # rng = 5

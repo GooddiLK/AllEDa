@@ -2,6 +2,7 @@ import math
 
 import numpy as np
 
+from lab1.Examples import func_table
 from lab1.GradientDescent import GradientDescent, GDException
 from lab1.OneDimensional import Wolfe
 
@@ -44,10 +45,10 @@ def find_intersect(fromDot, path, sphereRadius):  # need to check
     return fromDot + t_clipped * path
 
 
-def dog_leg(pre_gd, xk, C_dot, delta, model, model_gradient_matrix_function, mop):
+def dog_leg(C_dot, delta, model, model_gradient_matrix_function, mop):
     gd = GradientDescent(model, model_gradient_matrix_function, mop, None)
-    gd.vector = pre_gd.vector
-    gd.history().append(xk.astype(np.longdouble))
+    gd.vector = -model_gradient_matrix_function(np.array([0] * len(C_dot)).astype(np.longdouble))
+    gd.history().append(np.array([0, 0]).astype(np.longdouble))
     if delta >= np.linalg.norm(C_dot):
         return C_dot
     B_dot = find_minimum(gd.learningRateCalculator, gd)
@@ -120,16 +121,16 @@ def newtoneMethodStart(
         hess_reversed = np.linalg.inv(hess.astype(np.float64))
         # Вместо этого решать систему линейных уравнений + поддержка np.longdouble
         model = get_model(cur_result, gradient, hess)
-        C_dot = -hess_reversed @ gradient
+        C_dot = - hess_reversed @ gradient
         is_trusted = False
         model_gradient_matrix_function = lambda p: gradient + hess @ p
 
         while not is_trusted:
             gd.vector = -gradient
-            A_dot = dog_leg(gd, cur_x, C_dot, delta, model, model_gradient_matrix_function, mop)
+            A_dot = dog_leg(C_dot, delta, model, model_gradient_matrix_function, mop)
             poss_result = gd.func(A_dot + cur_x)
             if (poss_result == cur_result):
-                return [[cur_x], gd.__funcCalculation__, gd.__gradCalculation__, hessCalculation]
+                return [[cur_x] * cur_iter_number, gd.__funcCalculation__, gd.__gradCalculation__, hessCalculation]
             p_k = (cur_result - gd.func(A_dot + cur_x) + iteration_stop_limit / 16) / (
                     cur_result - model(A_dot) + iteration_stop_limit / 16)
             if p_k > trust_upper_bound:
@@ -149,16 +150,19 @@ def newtoneMethodStart(
                 if math.isnan(i):
                     raise GDException()
         cur_iter_number += 1
-    return [[cur_x], gd.__funcCalculation__, gd.__gradCalculation__, hessCalculation]
+    return [[cur_x] * cur_iter_number, gd.__funcCalculation__, gd.__gradCalculation__, hessCalculation]
 
 
 if __name__ == '__main__':
     x0 = np.array([0.0, 0])
-    x1 = np.array([120, 22])
+    x1 = np.array([120, 4])
+    funcc = func_table[3][0]
+    gradd = func_table[3][1]
+    gess = func_table[3][2]
     print(newtoneMethodStart(
-        function=lambda vector: (vector[0] - 2) ** 2 + (vector[1] + 1) ** 2 - 10,
-        gradient_matrix_function=lambda vector: np.array([2 * vector[0] - 4, 2 * vector[1] + 2]).astype(np.double),
-        hess_matrix_function=lambda vector: np.array([[2, 0], [0, 2]]).astype(np.double),
+        function=funcc,
+        gradient_matrix_function=gradd,
+        hess_matrix_function=gess,
         x0=x0,
         x1=x1,
         alpha_0=12,
