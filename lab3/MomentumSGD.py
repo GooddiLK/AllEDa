@@ -1,12 +1,12 @@
 import numpy as np
 from lab3.SGD import StochasticGradientDescent
 
+
 class MomentumSGD(StochasticGradientDescent):
     def __init__(self, learning_rate_calculator, stopping_criteria, regularization=None, reg_param=0.0001,
                  momentum=0.9):
-
         super().__init__(learning_rate_calculator, stopping_criteria, regularization, reg_param)
-        self.momentum = momentum # Коэффициент сохранения импульса (0 ; 1)
+        self.momentum = momentum  # Коэффициент сохранения импульса (0 ; 1)
         self.velocity = None  # Вектор скорости
 
     def _init_velocity(self, n_features):
@@ -23,8 +23,3 @@ class MomentumSGD(StochasticGradientDescent):
         point += self.velocity
 
         return point
-
-
-
-
-

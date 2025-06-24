@@ -3,7 +3,7 @@ import numpy as np
 from lab1.StoppingCriteria import IterationsPlus
 
 class StochasticGradientDescent:
-    def __init__(self, learning_rate_calculator, stopping_criteria, regularization=None, reg_param=0.0001):
+    def __init__(self, learning_rate_calculator, stopping_criteria, regularization=None, reg_param=0.001):
         self.learningRateCalculator = learning_rate_calculator
         self.stoppingCriteria = stopping_criteria
         self.regularization = regularization
@@ -44,7 +44,6 @@ class StochasticGradientDescent:
         n_features = X.shape[1] # количество признаков
 
         while True:
-            # перемешиваем данные
             indices = np.arange(n_samples)
             np.random.shuffle(indices)
             X = X[indices]
@@ -74,7 +73,7 @@ class StochasticGradientDescent:
                                     + 2 * n_features)
 
             self.__history__.append(weight)
-            if self.stoppingCriteria(self, weight):
+            if self.stoppingCriteria(self, weight) or np.mean((np.dot(X, weight) - y)**2) < 0.0001:
                 break
 
         # Вычисление MSE на всех данных

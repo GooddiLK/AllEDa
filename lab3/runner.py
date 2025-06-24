@@ -78,7 +78,7 @@ def run_momentum_sgd(X, y, batch_size, learning_rate, stopping_criteria, regular
         momentum=momentum,
     )
 
-    start_weight = np.random.randn(X.shape[1]) * 0.01
+    start_weight = np.random.randn(X.shape[1]) * 0.000001
 
     res = sgd(
         start_weight=start_weight,
@@ -103,7 +103,7 @@ def run_custom_sgd(X, y, batch_size, learning_rate, stopping_criteria, regulariz
         regularization=regularization,
     )
 
-    start_weight = np.random.randn(X.shape[1]) * 0.01
+    start_weight = np.random.randn(X.shape[1]) * 0.001
     res = sgd(
         start_weight=start_weight,
         X=X,
