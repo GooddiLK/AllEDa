@@ -31,14 +31,15 @@ y = y.astype(np.float32).reshape(-1, 1)
 X_tensor = torch.FloatTensor(X)
 y_tensor = torch.FloatTensor(y)
 
-batch_sizes = [10, 30, 50, 100, 200, 300, 1000]
+batch_sizes = [1, 250, 500, 1000]
 results = []
 
 epochs = 1000
 sc = StoppingCriteria.Iterations(epochs)
 lr = LearningRateSchedulingConstant(0.001)
-reg = 'l1' # l1, l2, elastic
 
+
+reg = None
 for bs in batch_sizes:
     results.append(run_custom_sgd(X, y, bs, lr, sc, reg, epochs))
     results.append(run_momentum_sgd(X, y, bs, lr, sc, reg, 0.9, epochs))
@@ -54,3 +55,5 @@ df_results = pd.DataFrame(results)
 # mse - точность модели
 pd.set_option('display.max_columns', None)
 print(df_results[['type', 'batch_size', 'mse', 'time_sec', 'memory_mb', 'allocated_memory_mb']])
+print("_______________________________________________________________________")
+
