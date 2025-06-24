@@ -40,9 +40,9 @@ def run_torch_optimizer(optimizer_class, X, y, batch_size, epochs=100):
     criterion = nn.MSELoss()
 
     if optimizer_class == optim.Adam:
-        optimizer = optim.Adam(model.parameters(), lr=0.001)
+        optimizer = optim.Adam(model.parameters(), lr=0.01, betas=(0.8, 0.99), weight_decay=0.001)
     elif optimizer_class == optim.RMSprop:
-        optimizer = optim.RMSprop(model.parameters(), lr=0.001)
+        optimizer = optim.RMSprop(model.parameters(), lr=0.01, alpha=0.9, momentum=0.9)
     else:
         optimizer = optimizer_class(model.parameters())
 

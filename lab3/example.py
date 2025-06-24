@@ -31,10 +31,10 @@ y = y.astype(np.float32).reshape(-1, 1)
 X_tensor = torch.FloatTensor(X)
 y_tensor = torch.FloatTensor(y)
 
-batch_sizes = [1]
+batch_sizes = [10, 30, 50, 100, 200, 300, 1000]
 results = []
 
-epochs = 100000
+epochs = 1000
 sc = StoppingCriteria.Iterations(epochs)
 lr = LearningRateSchedulingConstant(0.001)
 reg = 'l1' # l1, l2, elastic
@@ -44,11 +44,11 @@ for bs in batch_sizes:
     results.append(run_momentum_sgd(X, y, bs, lr, sc, reg, 0.9, epochs))
 
     # PyTorch оптимизаторы
-    # results.append(run_torch_optimizer(optim.SGD, X_tensor, y_tensor, bs))
-    # results.append(run_torch_optimizer(lambda p: optim.SGD(p, momentum=0.9, lr=0.001), X_tensor, y_tensor, bs))
-    # results.append(run_torch_optimizer(lambda p: optim.SGD(p, momentum=0.9, lr=0.001, nesterov=True), X_tensor, y_tensor, bs))
-    # results.append(run_torch_optimizer(optim.RMSprop, X_tensor, y_tensor, bs))
-    # results.append(run_torch_optimizer(optim.Adam, X_tensor, y_tensor, bs))
+    results.append(run_torch_optimizer(optim.SGD, X_tensor, y_tensor, bs))
+    results.append(run_torch_optimizer(lambda p: optim.SGD(p, momentum=0.9, lr=0.001), X_tensor, y_tensor, bs))
+    results.append(run_torch_optimizer(lambda p: optim.SGD(p, momentum=0.9, lr=0.001, nesterov=True), X_tensor, y_tensor, bs))
+    results.append(run_torch_optimizer(optim.RMSprop, X_tensor, y_tensor, bs, epochs))
+    results.append(run_torch_optimizer(optim.Adam, X_tensor, y_tensor, bs, epochs))
 
 df_results = pd.DataFrame(results)
 # mse - точность модели
